@@ -5,6 +5,7 @@ import { createZoneActivation } from "./ui/zone-activation.js";
 import { createProjectExpando } from "./ui/project-expando.js";
 import { renderProjects } from "./ui/project-renderer.js";
 import { createHeroRobotEyes } from "./ui/hero-robot-eyes.js";
+import { createThemeController } from "./core/theme.js";
 import { createSignalField } from "./systems/signal-field.js";
 import { createZoneClimate } from "./systems/zone-climate.js";
 import { createDepthPlaneSystem } from "./systems/depth-plane-system.js";
@@ -44,12 +45,20 @@ const raf = createRafLoop();
 const signals = createSignals();
 const zones = createZoneActivation();
 
+const themeController = createThemeController();
+
 renderProjects();
 const projectExpando = createProjectExpando();
 
 const heroEyes = createHeroRobotEyes();
 
 function cleanupUi() {
+  try {
+    themeController?.destroy?.();
+  } catch {
+    // ignore
+  }
+
   try {
     projectExpando?.destroy?.();
   } catch {

@@ -5,6 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Siggmond</title>
     <meta name="description" content="Systems-focused engineer building inspectable services and operational tooling." />
+    <script>
+      (function () {
+        try {
+          var key = "theme";
+          var stored = null;
+          try {
+            stored = localStorage.getItem(key);
+          } catch (e) {
+            stored = null;
+          }
+          var theme = stored === "light" || stored === "dark" ? stored : null;
+          if (!theme) {
+            var m = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)");
+            theme = m && m.matches ? "light" : "dark";
+          }
+          document.documentElement.dataset.theme = theme;
+        } catch (e) {
+          document.documentElement.dataset.theme = "dark";
+        }
+      })();
+    </script>
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/world.css" />
     <link rel="stylesheet" href="css/motion.css" />
@@ -30,19 +51,19 @@
                   <p class="zone__lead">Systems-focused , failure-aware engineer building inspectable services and operational tooling.</p>
                   <p class="zone__lead">Role alignment : backend · systems · platform · full-stack.</p>
                 </div>
-                <div class="canopy-hero__art" aria-hidden="true">
+                <div class="canopy-hero__art">
                   <!-- LOCKED – do not enhance robot visuals without explicit approval. -->
-                  <div class="canopy-robot" aria-hidden="true">
-                    <svg class="canopy-robot__svg" viewBox="0 0 900 520" role="presentation" focusable="false" aria-hidden="true">
+                  <div class="canopy-robot">
+                    <svg class="canopy-robot__svg" viewBox="0 0 900 520" role="presentation" focusable="false">
                       <defs>
                         <linearGradient id="robotShellFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0" stop-color="var(--robot-shell-0, #f2f0ed)" />
-                          <stop offset="1" stop-color="var(--robot-shell-1, #e8eef6)" />
+                          <stop offset="0" stop-color="var(--robot-shell-0)" />
+                          <stop offset="1" stop-color="var(--robot-shell-1)" />
                         </linearGradient>
                         <radialGradient id="robotIrisFill" cx="50%" cy="45%" r="65%">
-                          <stop offset="0" stop-color="var(--robot-eye-iris-inner, #3f6f9a)" />
-                          <stop offset="60%" stop-color="var(--robot-eye-iris-mid, #315e86)" />
-                          <stop offset="100%" stop-color="var(--robot-eye-iris-outer, #223e5b)" />
+                          <stop offset="0" stop-color="var(--robot-eye-iris-inner)" />
+                          <stop offset="60%" stop-color="var(--robot-eye-iris-mid)" />
+                          <stop offset="100%" stop-color="var(--robot-eye-iris-outer)" />
                         </radialGradient>
                       </defs>
                       <g class="robot">
@@ -56,6 +77,23 @@
                           class="robot-shell"
                           d="M210 395 C220 265 295 150 430 110 C520 85 615 108 685 162 C750 212 792 292 802 380 C744 424 665 452 575 466 C452 488 318 470 240 430 C224 420 214 410 210 395 Z"
                         />
+
+                        <!-- LOCKED – robot theme toggle -->
+                        <g
+                          class="robot-theme-toggle"
+                          data-robot-theme-toggle
+                          tabindex="0"
+                          role="button"
+                          aria-label="Toggle color theme"
+                          aria-pressed="false"
+                          transform="translate(0 0)"
+                        >
+                          <circle class="robot-theme-toggle__hit" cx="450" cy="168" r="18" fill="transparent" />
+                          <circle class="robot-theme-toggle__ring" cx="450" cy="168" r="15" />
+                          <circle class="robot-theme-toggle__focus" cx="450" cy="168" r="18" />
+                          <path class="robot-theme-toggle__icon" d="M450 160 L450 170" />
+                          <path class="robot-theme-toggle__icon" d="M442 168 A8 8 0 1 0 458 168" />
+                        </g>
 
                       <path
                         class="robot-ridge"

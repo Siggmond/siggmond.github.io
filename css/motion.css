@@ -1,0 +1,19 @@
+html {
+  scroll-behavior: auto;
+}
+
+.layer--depth {
+  will-change: transform;
+}
+
+.signal-field {
+  will-change: background-position;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layer--depth,
+  .signal-field {
+    transition: none;
+    animation: none;
+  }
+}

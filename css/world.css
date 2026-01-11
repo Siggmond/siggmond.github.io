@@ -1,0 +1,558 @@
+#app {
+  min-height: 100vh;
+}
+
+.layer {
+  width: 100%;
+}
+
+.layer--depth {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.layer--depth {
+  z-index: 0;
+}
+
+.layer--depth.zone {
+  position: relative;
+  padding: clamp(var(--space-6), 7vw, var(--space-8)) var(--gutter);
+}
+
+.layer--content {
+  position: relative;
+  z-index: 2;
+}
+
+
+.signal-field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: calc(0.55 * var(--scrollContrast));
+  background-image:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.06) 0px, rgba(255, 255, 255, 0.06) 1px, transparent 1px, transparent 18px),
+    linear-gradient(115deg, rgba(255, 255, 255, 0.035) 0px, rgba(255, 255, 255, 0.035) 1px, transparent 1px, transparent 28px);
+  background-size: 100% 100%;
+  transform: translate3d(0, 0, 0);
+}
+
+/* LOCKED – do not enhance robot visuals without explicit approval. */
+
+.canopy-robot {
+  position: relative;
+  width: min(520px, 42vw);
+  max-width: 100%;
+  height: auto;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 1;
+  animation: none;
+  contain: paint;
+}
+
+.canopy-robot::before {
+  content: "";
+  position: absolute;
+  inset: -18% -14% -26% -14%;
+  z-index: 0;
+  background: radial-gradient(closest-side at 50% 58%, rgba(0, 0, 0, 0.38), transparent 72%);
+  pointer-events: none;
+}
+
+.canopy-robot__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  position: relative;
+  z-index: 1;
+  shape-rendering: geometricPrecision;
+}
+
+
+.canopy-robot__svg .robot-shell,
+.canopy-robot__svg .robot-ridge,
+.canopy-robot__svg .robot-detail,
+.canopy-robot__svg .robot-brow path,
+.canopy-robot__svg .robot-mouth,
+.canopy-robot__svg .robot-eye__lens,
+.canopy-robot__svg .robot-eye__inner {
+  vector-effect: non-scaling-stroke;
+}
+
+.canopy-robot__svg .robot-shell {
+  fill: url(#robotShellFill);
+  stroke: var(--robot-stroke-mid);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.canopy-robot__svg .robot-ridge,
+.canopy-robot__svg .robot-detail,
+.canopy-robot__svg .robot-brow path,
+.canopy-robot__svg .robot-mouth {
+  fill: none;
+  stroke: var(--robot-stroke);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.canopy-robot__svg .robot-ridge {
+  stroke: var(--robot-stroke-soft);
+}
+
+.canopy-robot__svg .robot-eye__socket {
+  fill: var(--robot-socket);
+}
+
+.canopy-robot__svg .robot-eye__lens {
+  fill: none;
+  stroke: var(--robot-stroke-soft);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.canopy-robot__svg .robot-eye__inner {
+  fill: var(--robot-eye-sclera);
+}
+
+.canopy-robot__svg .robot-eye__iris {
+  fill: url(#robotIrisFill);
+  stroke: var(--robot-eye-iris-ring);
+  stroke-width: 1;
+}
+
+.canopy-robot__svg .robot-eye__pupilDot {
+  fill: var(--robot-eye-pupil);
+}
+
+.canopy-robot__svg .robot-eye__highlight {
+  fill: var(--robot-eye-highlight);
+}
+
+.canopy-robot__svg .robot-torso__shell {
+  fill: var(--robot-shell-1);
+  stroke: var(--robot-stroke-soft);
+  stroke-width: 2;
+  opacity: 0.22;
+}
+
+/* LOCKED – robot facial expression system. Do not modify without approval. */
+
+.canopy-robot__svg .robot-brow,
+.canopy-robot__svg .robot-mouth {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.canopy-robot__svg .robot-brow path {
+  stroke: var(--robot-face-stroke);
+}
+
+.canopy-robot__svg .robot-mouth {
+  stroke: var(--robot-mouth-stroke);
+}
+
+.depth-plane {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: calc(var(--depthOpacity) * var(--scrollContrast));
+  background: var(--depthTint);
+  background-image: radial-gradient(900px 540px at 20% 10%, rgba(255, 255, 255, 0.06), transparent 60%),
+    radial-gradient(760px 540px at 80% 0%, rgba(255, 255, 255, 0.035), transparent 55%);
+}
+
+.zone {
+  padding: clamp(var(--space-6), 7vw, var(--space-8)) var(--gutter);
+  position: relative;
+}
+
+.zone::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.2;
+  background:
+    radial-gradient(1200px 840px at 50% 10%, rgba(255, 255, 255, 0.06), transparent 62%),
+    radial-gradient(900px 620px at 50% 90%, rgba(0, 0, 0, 0.42), transparent 68%);
+}
+
+.zone[data-zone="exit"]::before {
+  opacity: 0.2;
+}
+
+.zone__header,
+.zone__body {
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  transform: none;
+}
+
+.zone__inner {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.zone__header {
+  opacity: 1;
+  translate: 0 0;
+  transition: none;
+}
+
+.zone__header--canopy {
+  max-width: none;
+}
+
+.zone__header--canopy .canopy-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  align-items: center;
+  gap: clamp(var(--space-3), 4vw, var(--space-8));
+}
+
+.zone__header--canopy .canopy-hero__content {
+  min-width: 0;
+}
+
+.zone__header--canopy .canopy-hero__art {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 860px) {
+  .zone__header--canopy .canopy-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .zone__header--canopy .canopy-hero__art {
+    order: 2;
+    justify-content: flex-start;
+  }
+}
+
+.zone.is-revealed .zone__header {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.zone__label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-0);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.zone__title {
+  margin: var(--space-2) 0 var(--space-1);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.zone__header h1.zone__title {
+  font-size: var(--fs-6);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.02em;
+}
+
+.zone__header h2.zone__title {
+  font-size: var(--fs-5);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.015em;
+}
+
+.zone__lead {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--fs-2);
+  max-width: 70ch;
+  line-height: 1.62;
+}
+
+.surface .zone__label + .zone__lead {
+  margin-top: var(--space-1);
+}
+
+.zone__lead + .zone__lead {
+  margin-top: var(--space-1);
+}
+
+.zone[data-zone="canopy"] .zone__lead {
+  font-size: var(--fs-3);
+}
+
+.surface {
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--c-surface);
+  opacity: 1;
+  border: 1px solid var(--c-border);
+  box-shadow: var(--shadow-lg);
+}
+
+.project {
+  margin-top: var(--space-3);
+  position: relative;
+  border-radius: var(--radius-lg);
+  background: var(--c-surface);
+  overflow: clip;
+  border: 1px solid var(--c-border);
+  box-shadow: var(--shadow-lg);
+}
+
+.project[data-open] {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.project__toggle {
+  width: 100%;
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: 0;
+  text-align: left;
+  display: grid;
+  gap: var(--space-1);
+  cursor: pointer;
+}
+
+.project__toggle:focus-visible {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.project__toggle {
+  line-height: 1.5;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .project__toggle {
+    cursor: pointer;
+  }
+
+  .project__toggle:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  a[href] {
+    cursor: pointer;
+  }
+}
+
+.project__label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-0);
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+}
+
+.project__label--tags {
+  color: var(--text-muted);
+}
+
+.project__meta {
+  color: var(--text-muted);
+  font-size: var(--fs-1);
+  transition: color var(--dur-1) var(--ease-standard);
+}
+
+.project__micro {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-0);
+  letter-spacing: 0.02em;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  white-space: pre;
+}
+
+.project__constraint {
+  margin-top: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.project__constraint .mono {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.project__reviewed {
+  margin-top: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-0);
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .project__title {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-position: 0 calc(100% - 1px);
+    background-size: 0% 1px;
+    transition: background-size var(--dur-1) var(--ease-standard);
+  }
+
+  .project__toggle:hover .project__title,
+  .project__toggle:focus-visible .project__title {
+    background-size: 100% 1px;
+  }
+
+  .project[data-open] .project__title {
+    background-size: 100% 1px;
+  }
+
+  .project__toggle:hover .project__meta,
+  .project__toggle:focus-visible .project__meta {
+    color: var(--text-muted);
+  }
+}
+
+.systems-list {
+  margin: 0;
+  padding-left: var(--space-3);
+}
+
+.systems-list li {
+  margin: var(--space-1) 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.schematic {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-0);
+  letter-spacing: 0.02em;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  white-space: pre;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--fs-0);
+  letter-spacing: 0.02em;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  white-space: pre;
+}
+
+.footnote {
+  margin-top: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-0);
+  letter-spacing: var(--typeTracking);
+  color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zone__header {
+    transition: none;
+  }
+
+  .project__title,
+  .project__meta {
+    transition: none;
+  }
+
+  .canopy-robot {
+    animation: none;
+  }
+
+  .canopy-robot__svg .robot-brow--l,
+  .canopy-robot__svg .robot-brow--r,
+  .canopy-robot__svg .robot-mouth {
+    animation: none !important;
+    transform: none !important;
+  }
+
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .zone__header--canopy .canopy-hero__art {
+    display: none !important;
+  }
+
+  .layer--depth {
+    display: none !important;
+  }
+
+  .zone {
+    padding: 24px 0 !important;
+  }
+
+  .zone::before {
+    display: none !important;
+  }
+
+  .surface,
+  .project {
+    box-shadow: none !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    background: transparent !important;
+    opacity: 1 !important;
+  }
+
+  .project__toggle {
+    cursor: default !important;
+  }
+
+  .project__panel,
+  .project__panel[hidden] {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .project__meta,
+  .project__label,
+  .project__micro,
+  .project__reviewed,
+  .systems-list li,
+  .mono,
+  .schematic,
+  .footnote,
+  .zone__lead,
+  .zone__label {
+    color: rgba(0, 0, 0, 0.72) !important;
+  }
+
+  a {
+    text-decoration: underline !important;
+  }
+
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+  }
+}
+
+.project__panel {
+  padding: 0 var(--space-3) var(--space-3);
+}
+
+.project__panel p {
+  line-height: var(--lh-long);
+}

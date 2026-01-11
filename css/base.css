@@ -1,0 +1,212 @@
+:root {
+  --c-bg: #06070a;
+  --c-surface: #0d1016;
+  --c-surface-2: #101626;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.84);
+  --text-muted: rgba(255, 255, 255, 0.62);
+  --c-text: var(--text-secondary);
+  --c-muted: var(--text-muted);
+  --c-border: rgba(255, 255, 255, 0.08);
+  --c-border-strong: rgba(255, 255, 255, 0.14);
+  --c-shadow: rgba(0, 0, 0, 0.55);
+  --c-focus: rgba(210, 232, 255, 0.92);
+
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+  --space-7: 56px;
+  --space-8: 64px;
+
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+
+  --tap-target: 44px;
+
+  --shadow-lg: 0 18px 42px var(--c-shadow);
+  --shadow-md: 0 12px 28px rgba(0, 0, 0, 0.48);
+  --shadow-sm: 0 8px 18px rgba(0, 0, 0, 0.42);
+
+  --fs-0: 12px;
+  --fs-1: 14px;
+  --fs-2: 16px;
+  --fs-3: 18px;
+  --fs-4: 22px;
+  --fs-5: 28px;
+  --fs-6: clamp(34px, 4vw, 44px);
+
+  --lh-tight: 1.2;
+  --lh-body: 1.6;
+  --lh-long: 1.72;
+
+  --typeTracking: 0.08em;
+
+  --dur-1: 140ms;
+  --dur-2: 220ms;
+  --dur-3: 260ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  --font-primary: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Apple Color Emoji",
+    "Segoe UI Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --gutter: clamp(18px, 4vw, 56px);
+  --page-max: clamp(980px, 92vw, 1400px);
+  --content-max: 900px;
+
+  --scroll-y: 0px;
+  --scroll-v: 0;
+
+  --robot-opacity: 1;
+
+  --scrollContrast: 1;
+
+  --parallaxGain: 0.12;
+  --dampingMul: 1;
+  --depthOpacity: 0.4;
+  --depthTint: rgba(0, 0, 0, 0);
+  --boundaryPressure: 0;
+
+  --focusWash: 0;
+
+  --robot-shell-0: #eef3fa;
+  --robot-shell-1: #e6edf6;
+  --robot-stroke: #1b222c;
+  --robot-stroke-mid: #2a3340;
+  --robot-stroke-soft: rgba(27, 34, 44, 0.38);
+  --robot-ink: #0b0f14;
+  --robot-socket: rgba(11, 15, 20, 0.14);
+
+  --robot-eye-sclera: #ffffff;
+  --robot-eye-iris-inner: #3f6f9a;
+  --robot-eye-iris-mid: #315e86;
+  --robot-eye-iris-outer: #223e5b;
+  --robot-eye-iris-ring: rgba(34, 62, 91, 0.55);
+  --robot-eye-pupil: #070a0e;
+  --robot-eye-highlight: rgba(255, 255, 255, 0.86);
+
+  --robot-face-stroke: rgba(27, 34, 44, 0.55);
+  --robot-mouth-stroke: rgba(27, 34, 44, 0.42);
+}
+
+@media (min-width: 1440px) {
+  :root {
+    --page-max: clamp(1100px, 92vw, 1520px);
+    --content-max: min(74ch, 980px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+:root:has(.project[data-open]) {
+  --focusWash: 1;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, calc(0.08 * var(--focusWash))) 0%,
+      rgba(0, 0, 0, calc(0.12 * var(--focusWash))) 100%
+    ),
+    radial-gradient(1100px 760px at 50% -18%, rgba(30, 54, 86, 0.14), transparent 62%),
+    radial-gradient(1400px 900px at 50% 12%, rgba(255, 255, 255, 0.03), transparent 64%),
+    radial-gradient(1200px 900px at 50% 120%, rgba(0, 0, 0, 0.42), transparent 60%),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.018) 0%, rgba(255, 255, 255, 0.0) 22%, rgba(0, 0, 0, 0.16) 100%),
+    var(--c-bg);
+  color: var(--text-secondary);
+  font-family: var(--font-primary);
+  line-height: var(--lh-body);
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+p + p {
+  margin-top: var(--space-2);
+}
+
+ul,
+ol {
+  margin: var(--space-2) 0;
+  padding-left: var(--space-3);
+}
+
+li + li {
+  margin-top: var(--space-1);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+button:not([disabled]) {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.skip-link {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: 9999;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  background: #fff;
+  color: #000;
+  text-decoration: none;
+  transform: translateY(-140%);
+  transition: transform var(--dur-1) var(--ease-standard);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+::selection {
+  background: rgba(210, 232, 255, 0.18);
+}
+
+:focus-visible {
+  outline: 3px solid var(--c-focus);
+  outline-offset: 3px;
+}

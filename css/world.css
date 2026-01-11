@@ -558,6 +558,17 @@
   color: var(--text-muted);
 }
 
+.site-footer {
+  margin-top: var(--space-6);
+  padding-right: var(--gutter);
+  padding-bottom: var(--space-4);
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--fs-0);
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .zone__header {
     transition: none;

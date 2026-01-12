@@ -50,6 +50,93 @@ const themeController = createThemeController();
 renderProjects();
 const projectExpando = createProjectExpando();
 
+function initScreenshotInspect() {
+  const projectIds = ["taskflow-pro", "collab-engine", "syncbridge", "clientops-hub"];
+  const roots = projectIds
+    .map((id) => document.querySelector(`.project[data-project="${id}"]`))
+    .filter(Boolean);
+  if (roots.length === 0) return;
+
+  const grids = roots
+    .map((root) => root.querySelector(".project__screensGrid"))
+    .filter(Boolean);
+  if (grids.length === 0) return;
+
+  let overlay = document.querySelector(".project__inspect");
+  let overlayImg = overlay?.querySelector(".project__inspectImg");
+
+  if (!overlay || !overlayImg) {
+    overlay = document.createElement("div");
+    overlay.className = "project__inspect";
+    overlay.setAttribute("hidden", "");
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", "Screenshot inspection");
+
+    overlayImg = document.createElement("img");
+    overlayImg.className = "project__inspectImg";
+    overlayImg.alt = "";
+    overlayImg.decoding = "async";
+
+    overlay.appendChild(overlayImg);
+    document.body.appendChild(overlay);
+  }
+
+  function close() {
+    overlay.setAttribute("hidden", "");
+    overlayImg.removeAttribute("src");
+    try {
+      document.body.style.overflow = "";
+    } catch {
+      // ignore
+    }
+  }
+
+  function openFrom(img) {
+    const src = img?.getAttribute?.("src") ?? "";
+    if (!src) return;
+    overlayImg.src = src;
+    overlayImg.alt = img.getAttribute("alt") ?? "";
+    overlay.removeAttribute("hidden");
+    try {
+      document.body.style.overflow = "hidden";
+    } catch {
+      // ignore
+    }
+  }
+
+  for (const grid of grids) {
+    grid.addEventListener("click", (e) => {
+      const target = e.target;
+      if (!(target instanceof HTMLImageElement)) return;
+      if (!target.classList.contains("project__screenImg")) return;
+      openFrom(target);
+    });
+
+    grid.addEventListener("keydown", (e) => {
+      const key = e.key;
+      if (key !== "Enter" && key !== " ") return;
+      const target = e.target;
+      if (!(target instanceof HTMLImageElement)) return;
+      if (!target.classList.contains("project__screenImg")) return;
+      e.preventDefault();
+      openFrom(target);
+    });
+  }
+
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) close();
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (overlay.hasAttribute("hidden")) return;
+    close();
+  });
+}
+
+initScreenshotInspect();
+
 const heroEyes = createHeroRobotEyes();
 
 function cleanupUi() {

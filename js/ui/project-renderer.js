@@ -376,7 +376,282 @@ export function renderProjects({ root = document, items = projects } = {}) {
     panel.append(story);
     if (provesExpanded) panel.appendChild(provesExpanded);
     panel.append(guarantees);
-    if (hasLinks) panel.appendChild(links);
+
+    if (project.id === "taskflow-pro") {
+      const stackLine = typeof project?.stack === "string" && project.stack.trim() ? el("p", { className: "project__micro" }) : null;
+      if (stackLine) {
+        appendText(stackLine, `Tech stack: ${project.stack.trim()}`);
+        panel.appendChild(stackLine);
+      }
+
+      const screenshots = el("section", { className: "project__screens" });
+      const label = el("div", { className: "project__label" });
+      appendText(label, "Screenshots");
+
+      const grid = el("div", { className: "project__screensGrid" });
+
+      const items = [
+        {
+          file: "01-login-light.png",
+          caption: "Auth bootstrap with token-backed session and guarded routes"
+        },
+        {
+          file: "03-dashboard-shell.png",
+          caption: "Feature-shell layout with module-scoped navigation and route guards"
+        },
+        {
+          file: "04-projects-list-filters.png",
+          caption: "Queryable project index with stable filter + sort state"
+        },
+        {
+          file: "05-create-project-modal.png",
+          caption: "Validated project creation with typed request/response boundaries"
+        },
+        {
+          file: "07-kanban-board.png",
+          caption: "Optimistic task movement with rollback on persistence failure"
+        },
+        {
+          file: "08-kanban-task-details.png",
+          caption: "Task detail updates routed through normalized domain writes"
+        },
+        {
+          file: "09-activity-log.png",
+          caption: "Audit-style activity feed emitted as explicit domain events"
+        },
+        {
+          file: "10-admin-users-directory.png",
+          caption: "Admin directory with role assignment and controlled mutations"
+        },
+        {
+          file: "11-rbac-member-view.png",
+          caption: "RBAC-aware task views with enforced permission boundaries"
+        }
+      ];
+
+      for (const item of items) {
+        const fig = el("figure", { className: "project__screen" });
+        const img = el("img", {
+          className: "project__screenImg",
+          attrs: {
+            src: `assets/projects/taskflow-pro/${item.file}`,
+            alt: item.caption,
+            loading: "lazy",
+            decoding: "async"
+          }
+        });
+        const cap = el("figcaption", { className: "project__screenCap" });
+        appendText(cap, item.caption);
+        fig.append(img, cap);
+        grid.appendChild(fig);
+      }
+
+      screenshots.append(label, grid);
+      panel.appendChild(screenshots);
+    }
+
+    if (project.id === "collab-engine") {
+      const screenshots = el("section", { className: "project__screens" });
+      const label = el("div", { className: "project__label" });
+      appendText(label, "Screenshots");
+
+      const intro = el("p");
+      appendText(
+        intro,
+        "The following screenshots demonstrate protocol correctness, real-time fan-out, and recovery behavior. No UI is involved — all screenshots are taken from WebSocket clients and server logs."
+      );
+
+      const grid = el("div", { className: "project__screensGrid" });
+
+      const items = [
+        {
+          file: "04-ws-handshake.png",
+          caption:
+            "Client connects via WebSocket and completes the mandatory hello → hello_ack handshake, followed by an initial snapshot (resync)."
+        },
+        {
+          file: "05-two-clients.png",
+          caption:
+            "Two independent WebSocket clients connected to the same document receive identical op_echo messages in real time."
+        },
+        {
+          file: "06-concurrent-inserts.jpeg",
+          caption:
+            "Concurrent inserts targeting the same position converge deterministically across clients using total ordering on (lamport, replica_id)."
+        },
+        {
+          file: "07-replay.jpeg",
+          caption:
+            "A reconnecting client provides last_seen_server_seq; the server replays only the missing operations from the op log."
+        },
+        {
+          file: "08-resync.png",
+          caption:
+            "When replay is not possible, the server safely falls back to a full snapshot resync to re-establish a correct baseline."
+        }
+      ];
+
+      for (const item of items) {
+        const fig = el("figure", { className: "project__screen" });
+        const img = el("img", {
+          className: "project__screenImg",
+          attrs: {
+            src: `assets/projects/collab-engine/${item.file}`,
+            alt: item.caption,
+            loading: "lazy",
+            decoding: "async"
+          }
+        });
+        const cap = el("figcaption", { className: "project__screenCap" });
+        appendText(cap, item.caption);
+        fig.append(img, cap);
+        grid.appendChild(fig);
+      }
+
+      screenshots.append(label, intro, grid);
+      panel.appendChild(screenshots);
+    }
+
+    if (project.id === "syncbridge") {
+      const screenshots = el("section", { className: "project__screens" });
+      const label = el("div", { className: "project__label" });
+      appendText(label, "Screenshots");
+
+      const grid = el("div", { className: "project__screensGrid" });
+
+      const items = [
+        {
+          file: "01-api-docs.png",
+          caption: "FastAPI OpenAPI docs showing job, control, and metrics endpoints."
+        },
+        {
+          file: "02-enqueue-job-response.png",
+          caption: "Enqueueing a job via HTTP and receiving a durable job record."
+        },
+        {
+          file: "03-ui-job-list.png.jpeg",
+          caption: "Admin UI showing multiple jobs with different states."
+        },
+        {
+          file: "04-ui-job-detail-attempts.png",
+          caption: "Single job detail page with full attempt history and error types."
+        },
+        {
+          file: "05-retryable-failure-logs.png.jpeg",
+          caption: "Terminal logs showing retryable failures and retries."
+        },
+        {
+          file: "07-dlq-dead-job.png",
+          caption: "Job marked dead after exceeding retry budget (DLQ)."
+        },
+        {
+          file: "10-replay-creates-new-job.png",
+          caption: "Replay operation creating a new job linked to the failed one."
+        },
+        {
+          file: "11-metrics-endpoint.png",
+          caption: "Metrics endpoint returning job counts and success rate."
+        }
+      ];
+
+      for (const item of items) {
+        const fig = el("figure", { className: "project__screen" });
+        const img = el("img", {
+          className: "project__screenImg",
+          attrs: {
+            src: `assets/projects/syncbridge/${item.file}`,
+            alt: item.caption,
+            loading: "lazy",
+            decoding: "async"
+          }
+        });
+        const cap = el("figcaption", { className: "project__screenCap" });
+        appendText(cap, item.caption);
+        fig.append(img, cap);
+        grid.appendChild(fig);
+      }
+
+      screenshots.append(label, grid);
+      panel.appendChild(screenshots);
+    }
+
+    if (project.id === "clientops-hub") {
+      const screenshots = el("section", { className: "project__screens" });
+      const label = el("div", { className: "project__label" });
+      appendText(label, "Screenshots");
+
+      const grid = el("div", { className: "project__screensGrid" });
+
+      const items = [
+        {
+          file: "01-login.png",
+          caption: "Login screen (JWT-based auth entry point)."
+        },
+        {
+          file: "02-dashboard.png",
+          caption: "Operational dashboard overview."
+        },
+        {
+          file: "03-clients-list-search-pagination.png",
+          caption: "Clients directory with search and pagination."
+        },
+        {
+          file: "04-client-create-form.png",
+          caption: "Client creation form."
+        },
+        {
+          file: "05-client-archived-state.png",
+          caption: "Archived client state (soft-delete)."
+        },
+        {
+          file: "06-leads-pipeline.png",
+          caption: "Leads pipeline with status tracking."
+        },
+        {
+          file: "07-lead-status-change.png",
+          caption: "Lead status transition."
+        },
+        {
+          file: "08-invoices-table.png",
+          caption: "Invoices table view."
+        },
+        {
+          file: "09-invoice-create-form.png",
+          caption: "Invoice creation form."
+        },
+        {
+          file: "10-audit-log.png",
+          caption: "Audit log showing persisted write history."
+        },
+        {
+          file: "11-rbac-staff-view.png",
+          caption: "RBAC staff-level restricted view."
+        }
+      ];
+
+      for (const item of items) {
+        const fig = el("figure", { className: "project__screen" });
+        const img = el("img", {
+          className: "project__screenImg",
+          attrs: {
+            src: `assets/projects/clientops-hub/${item.file}`,
+            alt: item.caption,
+            loading: "lazy",
+            decoding: "async",
+            tabindex: "0"
+          }
+        });
+        const cap = el("figcaption", { className: "project__screenCap" });
+        appendText(cap, item.caption);
+        fig.append(img, cap);
+        grid.appendChild(fig);
+      }
+
+      screenshots.append(label, grid);
+      panel.appendChild(screenshots);
+    }
+
+    if (hasLinks && project.id !== "clientops-hub") panel.appendChild(links);
     if (consistencyModel) panel.appendChild(consistencyModel);
     if (timeDimension) panel.appendChild(timeDimension);
     if (interfaceContract) panel.appendChild(interfaceContract);
@@ -392,6 +667,8 @@ export function renderProjects({ root = document, items = projects } = {}) {
     panel.append(constraintWrap);
     if (whatNot) panel.appendChild(whatNot);
     panel.append(arch, decisionsWrap, diffsWrap, reviewed);
+
+    if (hasLinks && project.id === "clientops-hub") panel.appendChild(links);
 
     const clip = el("div", { className: "project__clip" });
     clip.append(toggle, panel);

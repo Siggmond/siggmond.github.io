@@ -1,0 +1,82 @@
+# Issue Assistant
+
+Deterministic-first GitHub issue triage engine: maintainers get explicit artifacts they can review, version, and trust.
+
+## Overview
+
+- Role: Owner / Engineer
+- Form factors: Python package (PyPI) + CLI + GitHub Action
+- Focus: deterministic automation, maintainer workflow support, artifact-first outputs
+
+Issue Assistant is built to produce consistent triage outputs for issues without probabilistic phrasing. It runs locally as a CLI and in GitHub Actions for issue events and scheduled digests.
+
+## Problem
+
+Issue triage is expensive and repetitive.
+
+- Maintainers need a stable issue summary.
+- Maintainership load needs to be visible (what is piling up, why).
+- Automation must be reviewable and deterministic to avoid increasing trust and review burden.
+
+## Constraints
+
+- Determinism: the same inputs must produce the same outputs.
+- Inspectability: every decision must be grounded in explicit rules and evidence fields.
+- Maintainer-first artifacts: outputs must be readable and versionable.
+- GitHub-native: must integrate with issue events and scheduled workflows.
+- Safe defaults: no speculative language, no invented facts.
+
+## Solution
+
+Issue Assistant implements a phased analysis pipeline and emits artifacts intended for maintainers.
+
+Typical outputs include:
+
+- `ISSUE_SUMMARY.md`
+- `MAINTAINER_LOAD.md`
+- `EXPLAINABILITY.md` (rules, thresholds, and evidence fields)
+
+It can run in two primary modes:
+
+1) As a Python package / CLI (`issue-assistant` → `issue_assistant.cli:main`)
+2) As a GitHub Action (issue events + weekly digest)
+
+## Key Decisions
+
+### 1) Deterministic-first rules
+
+Issue Assistant uses explicit rule evaluation with declared thresholds and evidence fields. It avoids probabilistic language and does not fabricate missing context.
+
+### 2) Artifact outputs over ephemeral suggestions
+
+The system emits versionable outputs (Markdown + JSON) so maintainers can:
+
+- review diffs
+- link artifacts in PRs
+- keep a stable historical record
+
+### 3) Two distribution surfaces
+
+- Python package under `src/issue_assistant/*` for local use and CI scripting
+- A GitHub Action (composite action) that installs from PyPI and runs analysis
+
+### 4) Phased pipeline with tests per phase
+
+Phases are independently testable (`tests/test_phase*.py`) to keep changes reviewable and to prevent regressions.
+
+## Operability
+
+- Clear failure behavior: missing context reduces output detail rather than generating invented claims.
+- Designed for GitHub API constraints: rate limiting and partial metadata availability are treated as expected conditions.
+- Workflow-friendly: outputs can be attached to PRs, stored as artifacts, or committed based on project policy.
+
+## Results
+
+- Lower maintainer load through consistent summaries and routing cues.
+- Better trust: decisions are explicit and anchored to evidence fields.
+- Reviewable automation: changes to rules and outputs become normal diffs.
+
+## Links
+
+- GitHub: https://github.com/Siggmond/issue-assistant
+- PyPI: https://pypi.org/project/issue-assistant/

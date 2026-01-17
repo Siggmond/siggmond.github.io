@@ -1,0 +1,86 @@
+# SyncBridge
+
+A systems project focused on deterministic boundaries, sync correctness, and operability.
+
+## Overview
+
+SyncBridge is a database-backed job/worker reference for long-running system-to-system synchronization. It models job lifecycle explicitly (leases, attempts, retries, dead-letter, replay) so correctness and recovery are inspectable instead of implied.
+
+## Why
+
+Provide a small, readable reference implementation of a database-backed job/worker pattern for system-to-system synchronization, with explicit handling of real failure modes (timeouts, rate limits), durable state, and operational controls (retry, cancel, DLQ, replay).
+
+## Problem
+
+Integration work between external systems is unreliable and long-running. Requests to “sync entity X” must be made durable, protected from duplicate active work, resilient to transient upstream failures, and observable. The system needs deterministic job state, attempt history, and safe recovery when a worker crashes mid-run.
+
+## Consistency + recovery model
+
+- Strong consistency for job state (DB transactions) with at-least-once execution semantics.
+- Restart safe: job state + attempts are durable; lease expiry enables safe reclaim after worker crash.
+- Enqueue is idempotency-friendly; state transitions are explicit and persisted; correlation IDs propagate.
+
+## What breaks first
+
+Hot rows / contention on the jobs table under bursty enqueue + multiple workers.
+
+## Tradeoffs
+
+DB-as-queue simplifies deployment and guarantees durability, but it requires careful leasing, indexing, and backoff modeling to avoid thundering herds and hot rows.
+
+## Excludes
+
+Intentionally excludes multi-tenant policy, distributed workers across hosts, and exactly-once semantics across external systems.
+
+## Failure modes
+
+- Upstream timeouts and transient network failures
+- Rate limits and retry-after enforcement
+- Worker crash mid-run (lease expiry + safe re-claim)
+- Duplicate enqueue / concurrent work on same entity
+- Exhausted retries leading to dead-letter state
+
+## Why not
+
+- Why not a message broker? Brokers are great at scale, but DB-as-queue is a readable reference for durable state transitions without extra infra.
+- Why not mutate the original job on replay? Preserving immutable attempt history makes post-incident analysis and auditability much safer.
+
+## Architecture
+
+FastAPI service exposing HTTP endpoints to enqueue and manage sync jobs. Jobs are persisted via SQLAlchemy in a relational database and act as the queue and source of truth. An in-process worker claims jobs via time-bounded leases, executes them through a JobExecutor, records immutable attempt history, classifies failures, retries with exponential backoff, moves exhausted jobs to a dead-letter state, and supports replay by creating linked jobs rather than mutating history.
+
+## Key decisions
+
+- Database is the durable queue and source of truth.
+- Explicit leasing for crash-safe job claiming.
+- Immutable attempt records per execution.
+- Typed error classification drives retry behavior.
+- Exponential backoff persisted via next_run_at.
+- Dead-letter state after max retries.
+- Replay creates a new job linked to the original.
+- Idempotency enforced at enqueue-time.
+- UTC-normalized timestamps for correctness.
+- Correlation IDs propagated through execution.
+
+## Differentiators
+
+- Demonstrates DB-as-queue pattern without external brokers.
+- Operational controls (retry, cancel, DLQ, replay) are first-class.
+- Failure behavior is deterministic and persisted.
+- Small codebase with explicit job lifecycle modeling.
+- Includes mock upstream systems to exercise failure paths.
+
+## Links
+
+- GitHub: https://github.com/Siggmond/sync-bridge
+
+## Screenshots
+
+- `01-api-docs.png`
+- `02-enqueue-job-response.png`
+- `03-ui-job-list.png.jpeg`
+- `04-ui-job-detail-attempts.png`
+- `05-retryable-failure-logs.png.jpeg`
+- `07-dlq-dead-job.png`
+- `10-replay-creates-new-job.png`
+- `11-metrics-endpoint.png`

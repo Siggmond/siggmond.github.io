@@ -1,0 +1,80 @@
+# ClientOps Hub
+
+## Overview
+
+A lightweight internal ops workspace to manage clients, leads, and invoices with server-enforced RBAC and an auditable write history.
+
+## Stack
+
+FastAPI · SQLAlchemy · SQLite · Vue 3 · Vite · JWT
+
+## Why
+
+Provide a lightweight internal workspace to manage clients, leads, and invoices with server-enforced access control and an auditable history of write actions, without adopting a full CRM stack.
+
+## Problem
+
+Small teams often need a single operational view of client relationships, lead pipeline state, and billing lifecycle, plus accountability over changes. Spreadsheets or ad-hoc tools lack consistent authorization, soft-delete safety, and a unified audit trail.
+
+## Tradeoffs
+
+A single-DB, two-app architecture keeps the system inspectable and easy to run locally, but it does not target multi-tenant scaling or external identity integrations.
+
+## Excludes
+
+Intentionally excludes multi-tenant SaaS concerns, SSO/IdP integrations, and production hardening beyond a reference implementation.
+
+## Failure modes
+
+- Auth token expiry and unauthorized access attempts
+- Race conditions on concurrent edits (server-side enforcement)
+- Soft-delete semantics and accidental destructive actions
+- Audit log integrity under partial failures
+- Client-side state drift vs server source of truth
+
+## Architecture
+
+Two-app repository: FastAPI backend + Vue 3 SPA frontend. REST API under `/api` for auth, clients, leads, invoices, and audit logs. SQLAlchemy models backed by SQLite. JWT bearer auth with role-based access enforced via FastAPI dependencies. Soft deletes via `deleted_at`. AuditLog persisted for all write actions. Frontend uses Axios, localStorage JWT, and UI gating while relying on server-side authorization.
+
+## Key decisions
+
+- Split backend (FastAPI) and frontend (Vue 3) into separate apps.
+- Use SQLite + SQLAlchemy for local persistence.
+- JWT bearer authentication with role-based authorization enforced server-side.
+- Soft-delete semantics with admin-only archive/restore.
+- Persist audit logs for all write operations.
+- Compute dashboard metrics client-side from list endpoints.
+- Auto-create tables and seed default accounts on empty database startup.
+
+## Differentiators
+
+- First-class persisted audit log with actor role and timestamps.
+- Consistent soft-delete semantics across all domain entities.
+- Authorization enforced at the API layer, not just UI gating.
+- Focused operational scope with clear domain boundaries.
+
+## What this is NOT
+
+- Do not claim enterprise CRM completeness.
+- Do not claim multi-tenant, SSO, or external identity providers.
+- Do not claim production-grade security posture.
+- Do not claim advanced analytics or reporting services.
+- Do not claim integrations or background job processing.
+
+## Links
+
+- GitHub: https://github.com/Siggmond/clientops-hub
+
+## Screenshots
+
+- `01-login.png`
+- `02-dashboard.png`
+- `03-clients-list-search-pagination.png`
+- `04-client-create-form.png`
+- `05-client-archived-state.png`
+- `06-leads-pipeline.png`
+- `07-lead-status-change.png`
+- `08-invoices-table.png`
+- `09-invoice-create-form.png`
+- `10-audit-log.png`
+- `11-rbac-staff-view.png`

@@ -1,0 +1,73 @@
+# VoiceForge AI
+
+## Overview
+
+A schema-first real-time audio→JSON pipeline designed to stay usable under latency, noise, and invalid model output.
+
+## Stack
+
+FastAPI · WebSockets · STT · LLMs
+
+## Why
+
+Built to turn live microphone audio into structured, schema-validated intelligence under low-latency streaming constraints.
+
+## Problem
+
+Real-time speech understanding: converting raw audio into usable outputs (clean transcript + structured JSON) while handling noisy input, variable audio formats, and unreliable LLM responses.
+
+## Tradeoffs
+
+A strict schema-first pipeline reduces downstream uncertainty but can reject partially-correct model outputs; this build favors correctness over recall under ambiguous audio.
+
+## Excludes
+
+Intentionally excludes speaker diarization, long-form batching, and production-grade model hosting concerns.
+
+## Failure modes
+
+- Partial / malformed audio frames and sample-rate mismatches
+- STT latency spikes, timeouts, and degraded accuracy under noise
+- LLM invalid JSON / schema violations
+- Transient network disconnects in WebSocket sessions
+- Backpressure and buffering when clients outpace processing
+
+## Architecture
+
+```
+Audio Input
+→ Decode / Normalize (PCM16 mono 16kHz)
+→ VAD segmentation
+→ STT inference
+→ LLM inference (JSON-only)
+→ Pydantic validation
+→ REST / WebSocket output
+```
+
+## Key decisions
+
+- WebSocket streaming with micro-batched PCM to balance latency and request overhead.
+- Single normalized audio format to make VAD/STT deterministic.
+- VAD before STT to reduce cost and silence hallucination.
+- Schema-first LLM integration with strict Pydantic validation.
+- Bounded retries and shared async clients for production stability.
+
+## Differentiators
+
+- Explicit streaming protocol (binary PCM + flush events).
+- Clear separation between deterministic systems code and probabilistic AI components.
+- Defensive handling of partial failures without tearing down sessions.
+
+## Links
+
+- GitHub: https://github.com/Siggmond/voiceforg-ai
+
+## Screenshots
+
+- `01-swagger-home.png`
+- `02-openapi-endpoints-list.png`
+- `03-analyze-request.png`
+- `04-analyze-response.png`
+- `05-transcribe-upload-form.png`
+- `06-transcribe-response.png`
+- `07-terminal-startup-logs.png`

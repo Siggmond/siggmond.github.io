@@ -1,0 +1,86 @@
+# Collab Engine
+
+## Overview
+
+A reference-grade collaborative editing core that converges under reorder/duplication and supports replay-based recovery.
+
+## Stack
+
+FastAPI · WebSockets · CRDT
+
+## Why
+
+Built to solve real-time multi-client text editing under constraint out-of-order and concurrent operation delivery.
+
+## Problem
+
+Authoritative server-side collaborative text editing where concurrent inserts/deletes must converge despite delayed, reordered, or duplicated operations. Naïve index-based approaches break under concurrency and lead to divergent replicas.
+
+## Tradeoffs
+
+CRDT-based correctness adds state and protocol complexity compared to naïve index edits; this build prioritizes convergence and replayability over minimal payload size.
+
+## Excludes
+
+Intentionally excludes auth, multi-document ACLs, and production persistence backends (persistence is abstracted but not fully implemented).
+
+## Failure modes
+
+- Out-of-order, duplicated, or dropped operations
+- Reconnect / resync after client disconnect
+- Concurrent edits referencing unknown parents
+- Partial broadcast failures and divergent client state
+- Server crash mid-session (replay / resync paths)
+
+## Why not
+
+- Why not OT? OT correctness is subtle under arbitrary reorder/duplication; CRDT invariants are easier to make explicit and test for convergence.
+- Why not P2P? A server simplifies authorization, replay, and operational control; this is a reference build for deterministic recovery paths.
+
+## Architecture
+
+```
+Clients
+→ WebSocket protocol (hello / op)
+→ Session Manager (rooms + broadcast)
+→ Document Service
+   - per-document lock
+   - authoritative server_seq
+   - CRDT integration
+→ Persistence (op log + snapshot; Phase 1: in-memory)
+→ Server → clients (op echo / resync)
+```
+
+## Key decisions
+
+- Use a sequence CRDT (RGA-style) to guarantee convergence under concurrent edits.
+- Represent elements with stable identities (lamport clock + replica id) instead of positional indexes.
+- Use insert-after semantics with explicit parent_id to avoid index-shift errors.
+- Treat deletes as monotonic tombstones to keep integration commutative and idempotent.
+- Buffer operations that reference unknown parents or ids until dependencies arrive.
+- Assign a monotonically increasing server_seq per document for authoritative replay and recovery.
+- Replay ops on reconnect up to a fixed cap; otherwise force a full snapshot resync.
+- Serialize per-document mutation via async locks to ensure deterministic sequencing and persistence.
+
+## Differentiators
+
+- CRDT invariants and deterministic merge rules are explicit and enforced in code.
+- Clear separation between protocol handling, session management, CRDT logic, and persistence.
+- Recovery and resync are first-class parts of the protocol, not an afterthought.
+- Persistence is abstracted, allowing future backends without changing merge logic.
+- Combines CRDT convergence with an authoritative server sequence for durability and replay.
+
+## Links
+
+- GitHub: https://github.com/Siggmond/collab-engine
+
+## Screenshots
+
+- `01-server-running.png`
+- `02-health.png`
+- `03-swagger.png`
+- `04-ws-handshake.png`
+- `05-two-clients.png`
+- `06-concurrent-inserts.jpeg`
+- `07-replay.jpeg`
+- `08-resync.png`

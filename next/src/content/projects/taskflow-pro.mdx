@@ -1,0 +1,81 @@
+# TaskFlow Pro
+
+## Overview
+
+A portable, frontend-only project management app that exercises production-style frontend architecture patterns (typed API boundary, feature modules, global error handling, RBAC) without requiring a real backend to run.
+
+## Stack
+
+Vue 3 · TypeScript · Vite · Pinia · Vue Router · Axios
+
+## Why
+
+Build a portable, frontend-only project management app that exercises production-style frontend architecture patterns (typed API boundary, feature modules, global error handling, RBAC) without requiring a real backend to run.
+
+## Problem
+
+Teams need a lightweight way to organize work into projects and track tasks moving through a workflow, while still modeling real product constraints like authenticated access, role-based permissions, and an audit trail of changes.
+
+## Tradeoffs
+
+A localStorage-backed mock backend preserves realistic HTTP semantics but cannot model true concurrency or server-enforced invariants; it optimizes for portability and architectural clarity.
+
+## Excludes
+
+Intentionally excludes a real backend, multi-user concurrency, and long-term data governance concerns.
+
+## Failure modes
+
+- localStorage quota / corruption
+- 401/403 auth failures and role gating errors
+- Retryable request failures surfaced through normalized errors
+- Optimistic UI updates requiring rollback
+- State hydration mismatches on refresh
+
+## Architecture
+
+```
+Single-page Vue 3 + TypeScript application built with Vite.
+Routing via Vue Router with auth guards and role-gated routes.
+State via Pinia stores per feature module with a strict store/service split.
+Centralized Axios client with retry, normalized errors, and 401 handling.
+Mock REST API implemented as an Axios adapter backed by localStorage.
+Auth simulated via bearer token encoding userId.
+Global toast store for runtime/store errors; theme persisted in localStorage.
+```
+
+## Key decisions
+
+- Feature-first module layout (src/modules/*) to keep domain boundaries clear.
+- Strict store/service split so side effects live behind a typed boundary.
+- Centralized Axios client for consistent retries and error normalization.
+- RBAC enforced in both UI and store layers to prevent accidental privilege escalation.
+- Mock REST API implemented as an Axios adapter to preserve real HTTP semantics.
+- localStorage-backed persistence to enable realistic CRUD flows without server infra.
+- Optimistic task movement with rollback on failure for correct UX modeling.
+- Activity log modeled as explicit domain events emitted by the mock API.
+
+## Differentiators
+
+- Persistent mock backend supporting auth, RBAC, and CRUD without a real server.
+- Authoritative permission checks in the state layer, not just UI gating.
+- Resilient failure behavior with retries, normalized errors, and global surfacing.
+- Typed domain contracts and a consistent REST-like API surface.
+- Audit-style activity feed tied to domain mutations.
+
+## Links
+
+- GitHub: https://github.com/Siggmond/taskflow-pro
+
+## Screenshots
+
+- `01-login-light.png`
+- `03-dashboard-shell.png`
+- `04-projects-list-filters.png`
+- `05-create-project-modal.png`
+- `06-project-overview.png`
+- `07-kanban-board.png`
+- `08-kanban-task-details.png`
+- `09-activity-log.png`
+- `10-admin-users-directory.png`
+- `11-rbac-member-view.png`

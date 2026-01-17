@@ -1,0 +1,77 @@
+# RepoScope AI
+
+Deterministic repository intelligence: artifact-first documentation for fast, trustable onboarding.
+
+## Overview
+
+- Role: Owner / Engineer
+- Focus: DevTools, onboarding velocity, inspectability
+
+RepoScope AI is built to answer a simple question quickly and reliably: **"What is this repo, how does it work, and where do I start?"**
+
+Instead of relying on a black-box summary, the system is designed around **inspectable artifacts** (index files, structured summaries, references) that make the output verifiable and maintainable.
+
+## Problem
+
+Large repositories are expensive to understand.
+
+- New engineers spend days building a mental model.
+- Documentation is often outdated or unstructured.
+- Search is noisy and lacks context.
+- AI summaries can be fast but are hard to trust without evidence.
+
+## Constraints
+
+- **Trust**: output must be verifiable (not vibes).
+- **Determinism**: results should be stable enough to review and version.
+- **Speed**: first useful artifacts must be produced quickly.
+- **Scale**: should work on real repos with many files.
+- **Bounded scope**: solve onboarding and navigation first; avoid becoming a full platform.
+
+## Solution
+
+RepoScope AI produces an artifact set that acts as a repository "map":
+
+- A top-level index of key areas
+- Structured summaries per module/area
+- References back to source paths
+- A predictable entry point for onboarding
+
+The goal is a tight feedback loop:
+
+"Generate artifacts" → "Review" → "Commit" → "Use for onboarding".
+
+## Key decisions
+
+### 1) Artifact-first over chat-first
+Artifacts can be reviewed, diffed, and improved. This makes the system compatible with real engineering workflows.
+
+### 2) Explicit boundaries and scope
+The system focuses on onboarding and navigation. It avoids being a general-purpose agent or an always-on service.
+
+### 3) Inspectability as a hard requirement
+Every summary is expected to be anchored to a path and backed by evidence.
+
+### 4) Deterministic outputs where possible
+Stable structure enables:
+
+- PR review of documentation changes
+- incremental improvements
+- consistent onboarding quality
+
+## Operability
+
+- Clear failure modes: if an artifact can’t be produced, the output should degrade gracefully.
+- Output is designed to be human-reviewable.
+- Incremental iteration is preferred over one-shot generation.
+
+## Results
+
+- Faster onboarding path: a clear starting point and repository map
+- Better trust: artifacts can be reviewed and versioned
+- Better maintenance: improvements become normal PRs instead of tribal knowledge
+
+## Links
+
+- GitHub: https://github.com/Siggmond/reposcope-ai
+- PyPI: https://pypi.org/project/reposcope-ai/

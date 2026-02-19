@@ -29,35 +29,54 @@ const TAB_SPECS: TabSpec[] = [
     id: "devtools",
     label: "DevTools",
     description: "Tooling, automation, and developer experience systems.",
-    filter: (project) =>
-      project.type === "tool" ||
-      project.categories?.includes("tooling") ||
-      project.domains?.includes("developer-experience") ||
-      project.domains?.includes("open-source"),
+    filter: (project) => {
+      const categories = project.categories ?? [];
+      const domains = project.domains ?? [];
+
+      return (
+        project.type === "tool" ||
+        categories.includes("tooling") ||
+        domains.includes("developer-experience") ||
+        domains.includes("open-source")
+      );
+    },
   },
   {
     id: "systems",
     label: "Systems",
     description: "Distributed systems, platform work, and integration patterns.",
-    filter: (project) =>
-      project.domains?.includes("distributed-systems") ||
-      project.domains?.includes("platform") ||
-      project.domains?.includes("integration"),
+    filter: (project) => {
+      const domains = project.domains ?? [];
+
+      return (
+        domains.includes("distributed-systems") ||
+        domains.includes("platform") ||
+        domains.includes("integration")
+      );
+    },
   },
   {
     id: "apps",
     label: "Apps",
     description: "Full-stack and internal tools with UX + workflow design.",
-    filter: (project) =>
-      project.type === "application" ||
-      project.domains?.includes("full-stack") ||
-      project.domains?.includes("internal-tools"),
+    filter: (project) => {
+      const domains = project.domains ?? [];
+
+      return (
+        project.type === "application" ||
+        domains.includes("full-stack") ||
+        domains.includes("internal-tools")
+      );
+    },
   },
   {
     id: "mobile",
     label: "Mobile",
     description: "Flutter-first mobile product builds and commerce apps.",
-    filter: (project) => project.domains?.includes("mobile"),
+    filter: (project) => {
+      const domains = project.domains ?? [];
+      return domains.includes("mobile");
+    },
   },
 ];
 
@@ -76,7 +95,11 @@ export function ProjectsTabs({ projects }: { projects: ProjectEntry[] }) {
 
   return (
     <section className="mt-10 space-y-6">
-      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Project categories">
+      <div
+        className="flex flex-wrap gap-2"
+        role="tablist"
+        aria-label="Project categories"
+      >
         {TAB_SPECS.map((tab) => {
           const isActive = tab.id === activeTabId;
           return (
@@ -106,7 +129,9 @@ export function ProjectsTabs({ projects }: { projects: ProjectEntry[] }) {
               Specification
             </div>
             <div className="text-lg font-semibold">{activeTab.label}</div>
-            <p className="max-w-2xl text-sm text-muted-foreground">{activeTab.description}</p>
+            <p className="max-w-2xl text-sm text-muted-foreground">
+              {activeTab.description}
+            </p>
           </div>
           <div className="rounded-full border border-foreground/10 px-3 py-1 text-xs font-mono text-muted-foreground">
             {filteredProjects.length} Projects

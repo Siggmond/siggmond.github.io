@@ -17,3 +17,8 @@ node_modules/
 
 # Local Netlify folder
 .netlify
+
+# demo videos (hosted externally)
+next/public/projects/**/demo-videos/
+next/assets/projects/**/demo-videos/
+

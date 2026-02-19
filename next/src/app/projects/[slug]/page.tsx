@@ -20,7 +20,7 @@ export async function generateMetadata({
   const project = getProject(slug);
   if (!project) return {};
 
-  const title = `${project.title} · Siggmond`;
+  const title = `${project.title} - Siggmond`;
   const description = project.summary;
 
   return {
@@ -69,6 +69,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         caption: s.caption,
       }))
     : [];
+  const screenshotLayout = project.type === "application" ? "compact-strip" : "grid";
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-16">
@@ -95,7 +96,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         <p className="text-muted-foreground">{project.summary}</p>
       </header>
 
-      <div className="mt-6 rounded-2xl border border-foreground/10 bg-foreground/[0.02] p-6">
+      <div className="highlight-card mt-6 rounded-2xl p-6">
         <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
           {project.year ? <span>{project.year}</span> : null}
           {project.stack ? <span>{project.stack}</span> : null}
@@ -129,10 +130,10 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         ) : null}
       </div>
 
-      <ScreenshotGallery items={screenshots} />
+      <ScreenshotGallery items={screenshots} layout={screenshotLayout} demoVideoSrc={project.demoVideo} />
 
       {rendered.html ? (
-        <article className="prose prose-zinc dark:prose-invert mt-10 max-w-none">
+        <article className="prose prose-invert mt-10 max-w-none text-foreground">
           <div dangerouslySetInnerHTML={{ __html: rendered.html }} />
         </article>
       ) : (
@@ -196,7 +197,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
       {project.architecture ? (
         <section className="mt-10">
           <div className="text-sm tracking-widest uppercase text-muted-foreground font-mono">Architecture</div>
-          <pre className="mt-3 overflow-auto rounded-xl border border-foreground/10 bg-background p-4 text-sm">
+          <pre className="highlight-card mt-3 overflow-auto rounded-xl bg-background p-4 text-sm">
             {project.architecture}
           </pre>
         </section>
@@ -204,3 +205,4 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
     </main>
   );
 }
+

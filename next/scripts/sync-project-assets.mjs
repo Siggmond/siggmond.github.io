@@ -19,34 +19,58 @@ function copyDir(srcDir, dstDir) {
   }
 }
 
-const srcRoot = path.join(process.cwd(), "assets", "projects");
-const dstRoot = path.join(process.cwd(), "public", "projects");
+function syncProjectAssets() {
+  const srcRoot = path.join(process.cwd(), "assets", "projects");
+  const dstRoot = path.join(process.cwd(), "public", "projects");
 
-if (!fs.existsSync(srcRoot)) {
-  console.log(`[sync-project-assets] No source folder found: ${srcRoot}`);
-  process.exit(0);
+  if (!fs.existsSync(srcRoot)) {
+    console.log(`[sync-project-assets] No source folder found: ${srcRoot}`);
+    return false;
+  }
+
+  ensureDir(dstRoot);
+
+  const slugs = fs
+    .readdirSync(srcRoot, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name);
+
+  let copiedFiles = 0;
+  for (const slug of slugs) {
+    const srcDir = path.join(srcRoot, slug);
+    const dstDir = path.join(dstRoot, slug);
+
+    // Copy everything each time (simple + deterministic)
+    copyDir(srcDir, dstDir);
+
+    const count = fs
+      .readdirSync(dstDir, { withFileTypes: true })
+      .filter((e) => e.isFile()).length;
+    copiedFiles += count;
+  }
+
+  console.log(`[sync-project-assets] Synced ${slugs.length} project folders into ${dstRoot}`);
+  console.log(`[sync-project-assets] Note: file count is per top-level folder only (${copiedFiles})`);
+  return true;
 }
 
-ensureDir(dstRoot);
+function syncBackgroundAssets() {
+  const srcRoot = path.join(process.cwd(), "assets", "background");
+  const dstRoot = path.join(process.cwd(), "public", "background");
 
-const slugs = fs
-  .readdirSync(srcRoot, { withFileTypes: true })
-  .filter((d) => d.isDirectory())
-  .map((d) => d.name);
+  if (!fs.existsSync(srcRoot)) {
+    console.log(`[sync-project-assets] No source folder found: ${srcRoot}`);
+    return false;
+  }
 
-let copiedFiles = 0;
-for (const slug of slugs) {
-  const srcDir = path.join(srcRoot, slug);
-  const dstDir = path.join(dstRoot, slug);
-
-  // Copy everything each time (simple + deterministic)
-  copyDir(srcDir, dstDir);
-
-  const count = fs
-    .readdirSync(dstDir, { withFileTypes: true })
-    .filter((e) => e.isFile()).length;
-  copiedFiles += count;
+  copyDir(srcRoot, dstRoot);
+  console.log(`[sync-project-assets] Synced background assets into ${dstRoot}`);
+  return true;
 }
 
-console.log(`[sync-project-assets] Synced ${slugs.length} project folders into ${dstRoot}`);
-console.log(`[sync-project-assets] Note: file count is per top-level folder only (${copiedFiles})`);
+const didSyncProjects = syncProjectAssets();
+const didSyncBackground = syncBackgroundAssets();
+
+if (!didSyncProjects && !didSyncBackground) {
+  console.log("[sync-project-assets] Nothing to sync.");
+}

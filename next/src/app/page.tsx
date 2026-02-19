@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AppsSection } from "@/components/AppsSection";
 import { ContactForm } from "@/components/ContactForm";
 import { projects } from "@/content/projects";
 
@@ -8,6 +9,9 @@ const CONTACT_FORM_ACTION = process.env.NEXT_PUBLIC_CONTACT_FORM_ACTION ?? "http
 
 export default function Home() {
   const featured = projects.filter((p) => p.featured);
+  const apps = projects.filter(
+    (p) => p.type === "application" && p.slug !== "clientops-hub" && p.slug !== "taskflow-pro",
+  );
 
   return (
     <div className="min-h-screen">
@@ -19,6 +23,9 @@ export default function Home() {
           <nav className="flex items-center gap-2 font-mono text-xs tracking-wide">
             <a className="rounded-md px-3 py-2 hover:bg-foreground/[0.04]" href="#projects">
               Projects
+            </a>
+            <a className="rounded-md px-3 py-2 hover:bg-foreground/[0.04]" href="#apps">
+              Apps
             </a>
             <a className="rounded-md px-3 py-2 hover:bg-foreground/[0.04]" href="#about">
               About
@@ -72,18 +79,18 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-foreground/10 bg-foreground/[0.02] p-6">
+            <div className="highlight-card rounded-2xl p-6">
               <div className="space-y-2">
                 <div className="text-sm tracking-widest uppercase text-muted-foreground font-mono">Start Here</div>
                 <div className="grid gap-3">
-                  <Link className="rounded-xl border border-foreground/10 p-4 hover:border-foreground/20" href="/projects/reposcope-ai">
+                  <Link className="highlight-card rounded-xl p-4" href="/projects/reposcope-ai">
                     <div className="text-xs tracking-widest uppercase text-muted-foreground font-mono">Flagship</div>
                     <div className="mt-1 text-lg font-semibold">RepoScope AI</div>
                     <div className="mt-1 text-sm text-muted-foreground">
                       Deterministic repository intelligence with artifact-first onboarding.
                     </div>
                   </Link>
-                  <a className="rounded-xl border border-foreground/10 p-4 hover:border-foreground/20" href="#principles">
+                  <a className="highlight-card rounded-xl p-4" href="#principles">
                     <div className="text-xs tracking-widest uppercase text-muted-foreground font-mono">How I build</div>
                     <div className="mt-1 text-lg font-semibold">Engineering Principles</div>
                     <div className="mt-1 text-sm text-muted-foreground">
@@ -104,7 +111,7 @@ export default function Home() {
               Deterministic repository intelligence: artifact-first documentation for fast, trustable onboarding.
             </p>
           </header>
-          <div className="mt-6 rounded-2xl border border-foreground/10 bg-foreground/[0.02] p-6">
+          <div className="highlight-card mt-6 rounded-2xl p-6">
             <p className="text-muted-foreground">
               Start here for the artifacts and entry point, then scan the full portfolio below.
             </p>
@@ -138,7 +145,7 @@ export default function Home() {
               <Link
                 key={p.slug}
                 href={`/projects/${p.slug}`}
-                className="rounded-xl border border-foreground/10 bg-foreground/[0.02] p-5 hover:border-foreground/20"
+                className="highlight-card rounded-xl p-5"
               >
                 <div className="text-lg font-semibold">{p.title}</div>
                 <div className="mt-2 text-sm text-muted-foreground">{p.summary}</div>
@@ -163,13 +170,15 @@ export default function Home() {
           </div>
         </section>
 
+        <AppsSection apps={apps} />
+
         <section id="principles" className="py-14">
           <header className="space-y-3">
             <p className="text-sm tracking-widest uppercase text-muted-foreground font-mono">Engineering Principles</p>
             <h2 className="text-3xl font-semibold tracking-tight">Engineering Principles</h2>
             <p className="text-muted-foreground max-w-2xl">For architectural depth, start with SyncBridge.</p>
           </header>
-          <div className="mt-6 rounded-2xl border border-foreground/10 bg-foreground/[0.02] p-6">
+          <div className="highlight-card mt-6 rounded-2xl p-6">
             <ul className="space-y-2 text-muted-foreground">
               <li>I describe systems in terms of invariants, failure modes, and recovery paths.</li>
               <li>I prefer deterministic boundaries: explicit contracts, validated inputs, and observable state.</li>
@@ -187,7 +196,7 @@ export default function Home() {
               Systems-minded engineer focused on clarity, correctness, and operational reality.
             </p>
           </header>
-          <div className="mt-6 rounded-2xl border border-foreground/10 bg-foreground/[0.02] p-6">
+          <div className="highlight-card mt-6 rounded-2xl p-6">
             <ul className="space-y-2 text-muted-foreground">
               <li>Build developer tools and backend systems with explicit contracts and inspectable state.</li>
               <li>Bias toward deterministic boundaries, clear failure modes, and recovery paths.</li>

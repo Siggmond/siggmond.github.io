@@ -1,0 +1,27 @@
+# NovaCommerce - Flutter E-commerce App (Firebase + AI)
+
+## Short Portfolio Description
+
+Built a production-style e-commerce mobile app with Flutter, Riverpod, and Firebase.
+Implemented full shopping flows (browse, search, product variants, cart, checkout, and orders), plus wishlist, offers, loyalty, payments, and AI-assisted UX.
+
+## Key Highlights
+
+- Feature-first clean architecture (presentation/domain/data) with Riverpod state management.
+- Advanced routing with go_router, tabbed shell navigation, and nested routes.
+- Firestore transactional checkout that validates and decrements variant stock atomically before creating orders.
+- Local-first persistence (cart, wishlist, recent searches/viewed) with sync when signed in.
+- Payment flow architecture with Stripe (Cloud Functions + Payment Sheet), PayPal/demo, and fake providers.
+- On-device TFLite intent model for smart navigation suggestions.
+- Quality pipeline: CI runs format, analyze, tests (including golden tests), and release APK build.
+- 25 automated tests across viewmodels, widgets, routing behavior, mapping, and AI logic.
+
+## Tech Stack
+
+Flutter, Dart, Riverpod, GoRouter, Firebase Auth, Cloud Firestore, Cloud Functions, Stripe, SharedPreferences, TFLite, GitHub Actions
+
+## Resume Bullet Version
+
+- Developed a Flutter e-commerce app with Firebase backend, implementing end-to-end shopping and checkout flows.
+- Engineered transactional order placement in Firestore to prevent overselling and ensure data consistency.
+- Built modular feature-first architecture with Riverpod + GoRouter and automated CI/testing pipeline.

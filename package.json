@@ -1,0 +1,11 @@
+{
+  "name": "siggmond-github-io",
+  "private": true,
+  "scripts": {
+    "prepare:root-modules": "node ./scripts/ensure-root-node-modules-link.mjs",
+    "dev": "npm run prepare:root-modules && cd next && npm run dev",
+    "build": "npm run prepare:root-modules && cd next && npm run build",
+    "start": "npm run prepare:root-modules && cd next && npm run start",
+    "lint": "npm run prepare:root-modules && cd next && npm run lint"
+  }
+}

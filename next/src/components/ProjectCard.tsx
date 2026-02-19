@@ -9,7 +9,7 @@ export function ProjectCard({ project }: { project: ProjectEntry }) {
   return (
     <Link
       href={href}
-      className="group rounded-xl border border-foreground/10 bg-foreground/[0.02] p-5 hover:border-foreground/20 transition-colors"
+      className="highlight-card group rounded-xl p-5"
     >
       <div className="space-y-3">
         {project.thumbnail ? (

@@ -5,7 +5,10 @@ export type ProjectKey =
   | "collab-engine"
   | "syncbridge"
   | "clientops-hub"
-  | "taskflow-pro";
+  | "taskflow-pro"
+  | "nova-commerce"
+  | "stock-pilot"
+  | "gen-zero";
 
 export type ProjectLinks = {
   github?: string;
@@ -61,6 +64,7 @@ export type ProjectEntry = {
 
   thumbnail?: string;
   screenshots?: Screenshot[];
+  demoVideo?: string;
 
   caseStudyFile?: string;
 };
@@ -501,6 +505,249 @@ reposcope analyze .
       { src: "/projects/taskflow-pro/10-admin-users-directory.png" },
       { src: "/projects/taskflow-pro/11-rbac-member-view.png" },
     ],
+  },
+  {
+    slug: "nova-commerce",
+    title: "NovaCommerce",
+    subtitle: "Flutter E-commerce App (Firebase + AI)",
+    year: "2026",
+    tier: "standard",
+    type: "application",
+    summary:
+      "Production-style Flutter e-commerce app with Firebase backend, full shopping flows, transactional checkout, and AI-assisted UX.",
+    tags: ["flutter", "dart", "riverpod", "go-router", "firebase", "tflite"],
+    domains: ["mobile", "full-stack", "ai-systems"],
+    featured: false,
+    stack:
+      "Flutter, Dart, Riverpod, GoRouter, Firebase Auth, Firestore, Cloud Functions, Stripe, SharedPreferences, TFLite",
+    determinism: "deterministic checkout",
+    status: "production-style",
+    why:
+      "Build a production-style mobile commerce experience with robust architecture boundaries and realistic backend integrations.",
+    problem:
+      "E-commerce apps need fast, reliable UX and correct stock behavior during checkout, while preserving local state across sign-in and intermittent connectivity.",
+    tradeoffs:
+      "A local-first experience improves responsiveness, but it introduces sync/reconciliation complexity across devices and authentication transitions.",
+    excludes:
+      "This portfolio build does not claim full marketplace scope, ERP integrations, or multi-region production operations.",
+    proves:
+      "Deliver end-to-end mobile product architecture with transactional consistency, modular state/routing, and CI-enforced quality.",
+    differentiators: [
+      "Firestore transactional checkout validates and decrements variant stock atomically before creating orders.",
+      "Hybrid local-first persistence for cart, wishlist, recent searches/viewed with authenticated sync.",
+      "Payment abstraction supports Stripe (Cloud Functions + Payment Sheet), plus PayPal/demo/fake providers.",
+      "On-device TFLite intent model powers smart navigation suggestions.",
+      "CI pipeline runs formatting, static analysis, tests (including golden tests), and release APK build.",
+    ],
+    decisions: [
+      "Use feature-first clean architecture (presentation/domain/data) with Riverpod.",
+      "Use go_router with tabbed shell navigation and nested routes for advanced flows.",
+      "Protect checkout with Firestore transactions to prevent overselling.",
+      "Persist key shopping state locally, then sync when authenticated.",
+      "Keep payment providers behind a common interface for portability.",
+      "Cover viewmodels/widgets/routing/mapping/AI logic with automated tests.",
+    ],
+    failureModes: [
+      "Concurrent checkout against low stock variants.",
+      "Network loss during payment confirmation and order placement.",
+      "State divergence after auth transitions with pending local changes.",
+      "Provider-specific payment errors and delayed confirmation callbacks.",
+      "Model intent misclassification in on-device navigation suggestions.",
+    ],
+    thumbnail: "/projects/novacommerce/home-page-1.png",
+    demoVideo: "/projects/novacommerce/demo-videos/vd1.webm",
+    screenshots: [
+      { src: "/projects/novacommerce/sign-in-page.png", caption: "Sign In" },
+      { src: "/projects/novacommerce/home-page-1.png", caption: "Home" },
+      { src: "/projects/novacommerce/home-page-2.png", caption: "Home Feed" },
+      { src: "/projects/novacommerce/home-page-3.png", caption: "Home Categories" },
+      { src: "/projects/novacommerce/home-page-4.png", caption: "Home Highlights" },
+      { src: "/projects/novacommerce/home-page-5.png", caption: "Home Recommendations" },
+      { src: "/projects/novacommerce/search-tab-page.png", caption: "Search" },
+      { src: "/projects/novacommerce/search-tab-page-2.png", caption: "Search Results" },
+      { src: "/projects/novacommerce/item-detials-page.png", caption: "Item Details" },
+      { src: "/projects/novacommerce/offers-tab-page.png", caption: "Offers Tab" },
+      { src: "/projects/novacommerce/offers-details-page.png", caption: "Offer Details" },
+      { src: "/projects/novacommerce/gold-repositry-page.png", caption: "Gold Repository" },
+      { src: "/projects/novacommerce/cart-empty-page.png", caption: "Cart Empty State" },
+      { src: "/projects/novacommerce/location-menu.png", caption: "Location Menu" },
+      { src: "/projects/novacommerce/out-of-stock-item.png", caption: "Out of Stock State" },
+      { src: "/projects/novacommerce/account-tab-page.png", caption: "Account Tab (Main)" },
+      { src: "/projects/novacommerce/account-tab-page-2.png", caption: "Account Tab (More)" },
+      { src: "/projects/novacommerce/concierge-tab-page.png", caption: "Concierge Tab" },
+      { src: "/projects/novacommerce/arabic-language.png", caption: "Arabic Locale" },
+      { src: "/projects/novacommerce/francias-langauge.png", caption: "French Locale" },
+    ],
+    hasMdx: true,
+  },
+  {
+    slug: "stock-pilot",
+    title: "StockPilot",
+    subtitle: "Flutter Inventory + Demand Forecasting App",
+    year: "2026",
+    tier: "standard",
+    type: "application",
+    summary:
+      "Flutter inventory and demand forecasting app for tracking products, logging daily sales, estimating stockout risk, and suggesting reorder quantities.",
+    tags: [
+      "flutter",
+      "dart",
+      "riverpod",
+      "go-router",
+      "hive",
+      "fl-chart",
+      "inventory",
+      "forecasting",
+      "offline-first",
+    ],
+    domains: ["mobile", "operations", "product-analytics"],
+    featured: false,
+    stack:
+      "Flutter (Material 3), Dart, Riverpod, go_router, Hive, fl_chart, flutter_screenutil, google_fonts",
+    determinism: "deterministic forecasting (7-day moving average)",
+    status: "v1.0.0+1",
+    why:
+      "Built for operators who need fast daily inventory decisions without spreadsheet overhead or opaque predictions.",
+    problem:
+      "Small inventory teams need a simple, phone-first workflow to track stock, record sales, and act before stockouts happen.",
+    tradeoffs:
+      "StockPilot favors deterministic and explainable forecasting over black-box ML, improving trust and predictability while limiting model complexity.",
+    proves:
+      "A production-style Flutter app can combine clean architecture, deterministic forecasting logic, and resilient offline-first local data flows.",
+    differentiators: [
+      "Three-step onboarding plus quick navigator entry to core modules.",
+      "Dashboard blends KPI summaries, stock risk filtering, action queue, and quick-add sales in one flow.",
+      "Alerts pipeline classifies states into critical, warning, and opportunity with explicit prioritization.",
+      "Sales workflow supports per-product today upsert and two-week history from the same screen.",
+      "Adaptive performance engine downgrades expensive effects when frame pressure is detected.",
+    ],
+    decisions: [
+      "Use a feature-first, layered split: presentation, application, domain, and data.",
+      "Wire dependency injection through Riverpod repository providers with bootstrap overrides in main.dart.",
+      "Use Hive boxes for products, daily sales, and settings with explicit adapters for stable local persistence.",
+      "Normalize dates to UTC day-level for deterministic day-based aggregation and forecasting.",
+      "Use go_router with StatefulShellRoute for tab routing and explicit module paths.",
+      "Implement forecasting with a 7-day moving average and reorder quantity clamp at zero.",
+    ],
+    failureModes: [
+      "Sparse or zero demand history can reduce forecast confidence and produce conservative reorder behavior.",
+      "Incorrect lead-time or safety-stock values can shift reorder suggestions away from real-world needs.",
+      "Data-entry mistakes in daily sales can skew near-term stockout date calculations.",
+      "High rendering load can degrade animation quality without adaptive performance controls.",
+      "Onboarding seen-state is currently written but not used for initial route gating.",
+    ],
+    architecture: `
+Presentation
+- Onboarding, dashboard, alerts, products, sales, and settings pages.
+- UI remains focused on rendering and interaction.
+
+Application
+- Controllers, validation, and orchestration logic.
+- Alert parsing and prioritization.
+
+Domain
+- Product and DailySale models.
+- Repository interfaces and forecast contracts.
+
+Data
+- Hive repositories and adapters.
+- Boxes: products, daily_sales, settings.
+    `,
+    thumbnail: "/projects/stock-pilot/dashboard-1.png",
+    demoVideo: "/projects/stock-pilot/demo-videos/vd3.webm",
+    screenshots: [
+      { src: "/projects/stock-pilot/welcome-1.png", caption: "Onboarding Step 1" },
+      { src: "/projects/stock-pilot/welcome-2.png", caption: "Onboarding Step 2" },
+      { src: "/projects/stock-pilot/welcome-3.png", caption: "Onboarding Step 3" },
+      { src: "/projects/stock-pilot/quick-actions-page.png", caption: "Quick Navigator" },
+      { src: "/projects/stock-pilot/dashboard-1.png", caption: "Dashboard Overview" },
+      { src: "/projects/stock-pilot/dashboard-2.png", caption: "Dashboard KPIs" },
+      { src: "/projects/stock-pilot/dashboard-3.png", caption: "Dashboard Risk Filters" },
+      { src: "/projects/stock-pilot/dashboard-4.png", caption: "Dashboard Action Queue" },
+      { src: "/projects/stock-pilot/dashbaord-quick-actions.png", caption: "Dashboard Quick Actions" },
+      { src: "/projects/stock-pilot/alerts-page.png", caption: "Alerts Feed" },
+      { src: "/projects/stock-pilot/products-page.png", caption: "Products List" },
+      { src: "/projects/stock-pilot/add-product-page.png", caption: "Create/Edit Product" },
+      { src: "/projects/stock-pilot/edit_product.png", caption: "Edit Product Page" },
+      { src: "/projects/stock-pilot/sales-page.png", caption: "Sales Page and History" },
+      { src: "/projects/stock-pilot/quick-sale-entry.png", caption: "Quick Add Sale (Today Upsert)" },
+      { src: "/projects/stock-pilot/settings-page.png", caption: "Settings and Preferences" },
+      { src: "/projects/stock-pilot/settings-page-2.png", caption: "Settings Page 2" },
+    ],
+  },
+  {
+    slug: "gen-zero",
+    title: "MicroStore Optimizer (gen_zero)",
+    subtitle: "Seller-facing commerce intelligence with explainable next-best actions",
+    year: "2026",
+    tier: "standard",
+    type: "application",
+    summary:
+      "A Flutter app that helps small merchants track KPIs, view sales, and act on deterministic, explainable insights with offline-first local persistence.",
+    tags: ["flutter", "dart", "riverpod", "hive", "go-router", "fl-chart", "offline-first", "analytics"],
+    domains: ["mobile", "commerce", "product-analytics"],
+    featured: false,
+    stack: "Flutter (Material 3) · Dart (^3.8.1) · Riverpod · Hive · go_router · fl_chart",
+    determinism: "deterministic and explainable",
+    status: "v1.0.0+1 (mvp)",
+    why:
+      "Small merchants need phone-first intelligence that converts raw catalog and sales history into clear, explainable actions they can trust.",
+    problem:
+      "Small merchants often have product and transaction data, but not the time or tooling to convert it into decisions. They need clear KPIs, actionable recommendations with rationale, and reliable offline-first behavior.",
+    tradeoffs:
+      "The MVP favors deterministic rule-based explainability over opaque ML scoring, which improves trust and portability while limiting prediction breadth.",
+    excludes:
+      "Play Store signing is intentionally not configured yet; Android release builds use debug signing so the project runs out of the box for demos.",
+    proves:
+      "You can ship a portfolio-ready commerce intelligence app with deterministic insight generation, clean architecture boundaries, and robust offline-first persistence.",
+    differentiators: [
+      "Deterministic insights: every recommendation includes why, impact, and action.",
+      "Responsive KPI layout that remains stable on small screens and under large accessibility text.",
+      "Idempotent demo seeding that fills missing catalog/sales content even after partial setup.",
+      "Offline-first persistence with Hive for fast and predictable MVP behavior.",
+    ],
+    decisions: [
+      "Use a clean architecture-inspired split (domain/data/presentation) to keep business logic testable and reusable.",
+      "Keep insight generation inside a deterministic, composable rule engine and out of UI code.",
+      "Use manual Hive adapters and repositories that map persistence models to domain entities.",
+      "Use Riverpod controllers/providers to isolate state transitions from rendering concerns.",
+      "Provide stable per-action success/error feedback in UI to make demos and operations reliable.",
+    ],
+    failureModes: [
+      "Sparse or noisy sales history reducing confidence in recommendation quality.",
+      "Inaccurate inventory baselines causing weaker restock and price guidance.",
+      "Interrupted user sessions requiring strong local persistence recovery.",
+      "Partial demo data setup in existing installs (handled with idempotent seeding).",
+    ],
+    architecture: `
+Domain
+- Entities/value objects: Product, Sale, SaleLine, Insight.
+- Deterministic, composable rule-based InsightEngine.
+
+Data
+- Hive persistence with manual adapters.
+- Repositories mapping persistence models to domain entities.
+
+Presentation
+- Riverpod controllers/providers.
+- UI renders domain outputs; insight logic stays outside UI.
+    `,
+    thumbnail: "/projects/gen-zero/Home-Feed-4.png",
+    demoVideo: "/projects/gen-zero/demo-videos/vd2.webm",
+    screenshots: [
+      { src: "/projects/gen-zero/Welcome-screen.png", caption: "Welcome Screen" },
+      { src: "/projects/gen-zero/Home-Feed-2.png", caption: "Home Feed 2" },
+      { src: "/projects/gen-zero/Home-Feed-3.png", caption: "Home Feed 3" },
+      { src: "/projects/gen-zero/Home-Feed-4.png", caption: "Home Feed 4" },
+      { src: "/projects/gen-zero/Insights-Tab-Page.png", caption: "Insights Tab" },
+      { src: "/projects/gen-zero/Insight-Item-Details.png", caption: "Insight Details" },
+      { src: "/projects/gen-zero/Products-Tab.png", caption: "Products Tab" },
+      { src: "/projects/gen-zero/Add-New-Product.png", caption: "Add New Product" },
+      { src: "/projects/gen-zero/Edit-Product-Details.png", caption: "Edit Product Details" },
+      { src: "/projects/gen-zero/Sales-Tab-Page.png", caption: "Sales Tab" },
+      { src: "/projects/gen-zero/AI-Tab.png", caption: "AI Tab" },
+    ],
+    hasMdx: true,
   },
 ];
 

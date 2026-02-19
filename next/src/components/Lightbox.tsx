@@ -1,34 +1,42 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { assetPath } from "@/lib/assetPath";
 
-export function Lightbox({
-  images,
-  startIndex,
-  onClose,
-}: {
+type LightboxProps = {
   images: string[];
   startIndex: number;
+  demoVideoSrc?: string;
+  startWithDemo?: boolean;
   onClose: () => void;
-}) {
+};
+
+export function Lightbox({ images, startIndex, demoVideoSrc, startWithDemo = false, onClose }: LightboxProps) {
   const [index, setIndex] = useState(startIndex);
+  const [showDemo, setShowDemo] = useState(Boolean(startWithDemo && demoVideoSrc));
   const dialogRef = useRef<HTMLDivElement | null>(null);
+  const hasDemo = Boolean(demoVideoSrc);
 
   useEffect(() => {
     setIndex(startIndex);
   }, [startIndex]);
 
+  useEffect(() => {
+    setShowDemo(Boolean(startWithDemo && demoVideoSrc));
+  }, [startWithDemo, demoVideoSrc]);
+
   const count = images.length;
 
-  const goPrev = () => {
+  const goPrev = useCallback(() => {
+    if (count < 2) return;
     setIndex((cur) => (cur - 1 + count) % count);
-  };
+  }, [count]);
 
-  const goNext = () => {
+  const goNext = useCallback(() => {
+    if (count < 2) return;
     setIndex((cur) => (cur + 1) % count);
-  };
+  }, [count]);
 
   const getFocusable = () => {
     const root = dialogRef.current;
@@ -42,7 +50,7 @@ export function Lightbox({
   useEffect(() => {
     const first = getFocusable()[0];
     if (first) first.focus();
-  }, [index]);
+  }, [index, showDemo]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -52,13 +60,13 @@ export function Lightbox({
         return;
       }
 
-      if (e.key === "ArrowLeft") {
+      if (e.key === "ArrowLeft" && !showDemo) {
         e.preventDefault();
         goPrev();
         return;
       }
 
-      if (e.key === "ArrowRight") {
+      if (e.key === "ArrowRight" && !showDemo) {
         e.preventDefault();
         goNext();
         return;
@@ -76,18 +84,16 @@ export function Lightbox({
             e.preventDefault();
             focusable[focusable.length - 1]?.focus();
           }
-        } else {
-          if (currentIndex === focusable.length - 1) {
-            e.preventDefault();
-            focusable[0]?.focus();
-          }
+        } else if (currentIndex === focusable.length - 1) {
+          e.preventDefault();
+          focusable[0]?.focus();
         }
       }
     };
 
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [onClose, count]);
+  }, [onClose, showDemo, goPrev, goNext]);
 
   useEffect(() => {
     const prevOverflow = document.body.style.overflow;
@@ -97,9 +103,9 @@ export function Lightbox({
     };
   }, []);
 
-  if (!images.length) return null;
+  if (!images.length && !hasDemo) return null;
 
-  const currentSrc = images[index] ?? images[0];
+  const currentSrc = images[index] ?? images[0] ?? "";
 
   return (
     <div
@@ -117,28 +123,56 @@ export function Lightbox({
         aria-label="Screenshot preview"
       >
         <div className="lightbox-toolbar">
-          <div className="lightbox-counter" aria-label={`Image ${index + 1} of ${count}`}>
-            {index + 1} / {count}
-          </div>
+          {showDemo ? (
+            <div className="lightbox-counter" aria-label="Demo video">
+              Demo
+            </div>
+          ) : (
+            <div className="lightbox-counter" aria-label={`Image ${index + 1} of ${count}`}>
+              {index + 1} / {count}
+            </div>
+          )}
           <div className="lightbox-actions">
-            {count > 1 ? (
-              <button type="button" className="lightbox-button" onClick={goPrev} aria-label="Previous screenshot">
-                ←
+            {hasDemo ? (
+              <button
+                type="button"
+                className="lightbox-button"
+                onClick={() => setShowDemo((cur) => !cur)}
+                aria-pressed={showDemo}
+                aria-label={showDemo ? "Show screenshots" : "Show demo video"}
+              >
+                {showDemo ? "Images" : "Demo"}
               </button>
             ) : null}
-            {count > 1 ? (
+            {count > 1 && !showDemo ? (
+              <button type="button" className="lightbox-button" onClick={goPrev} aria-label="Previous screenshot">
+                Prev
+              </button>
+            ) : null}
+            {count > 1 && !showDemo ? (
               <button type="button" className="lightbox-button" onClick={goNext} aria-label="Next screenshot">
-                →
+                Next
               </button>
             ) : null}
             <button type="button" className="lightbox-button" onClick={onClose} aria-label="Close screenshot preview">
-              ✕
+              Close
             </button>
           </div>
         </div>
 
         <div className="lightbox-stage">
-          <img className="lightbox-image" src={assetPath(currentSrc)} alt="" />
+          {showDemo && demoVideoSrc ? (
+            <video
+              className="lightbox-image"
+              src={assetPath(demoVideoSrc)}
+              controls
+              autoPlay
+              playsInline
+              preload="metadata"
+            />
+          ) : (
+            <img className="lightbox-image" src={assetPath(currentSrc)} alt="" />
+          )}
         </div>
       </div>
     </div>

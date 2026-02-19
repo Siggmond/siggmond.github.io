@@ -1,0 +1,100 @@
+# MicroStore Optimizer (gen_zero)
+
+## One-line Description
+
+A Flutter app that helps small merchants track performance (KPIs), view sales, and act on deterministic, explainable insights (restock, pricing, bundles) with offline-first local persistence.
+
+## The Problem
+
+Small merchants often have product and transaction data, but not the time or tooling to convert it into decisions. They need:
+
+- Clear KPIs that work on a phone.
+- Actionable recommendations with a simple rationale ("why this?").
+- Offline-first reliability for a fast, predictable MVP.
+
+## The Solution
+
+MicroStore Optimizer provides:
+
+- A KPI dashboard designed to remain stable on small screens and under large accessibility text.
+- An insights feed that translates patterns into next actions with `why / impact / action`.
+- A demo-mode seeding flow so the app can be shown instantly without setup.
+
+## Core Features
+
+### Dashboard KPIs
+
+- Derived from persisted sales data.
+
+### Insights Engine (MVP)
+
+Every insight is explainable with `why`, `impact`, and `action`.
+
+Insight types:
+
+- Restock alert (high velocity + low stock)
+- Price increase or price decrease suggestions (demand vs price position)
+- Top performer and underperformer detection
+- Bundle opportunity detection (co-occurrence in orders)
+
+### Products
+
+- Create and edit a local product catalog.
+
+### Sales
+
+- View recent orders.
+- Generate demo sales for a reliable walkthrough.
+
+### Demo Mode
+
+- Seeds realistic catalog and sales data.
+- Tuned to reliably generate a compelling mix of insights.
+
+## Tech Stack
+
+- Flutter (Material 3)
+- Dart (`sdk: ^3.8.1`)
+- Riverpod (state management)
+- Hive (offline-first local persistence)
+- go_router (navigation)
+- fl_chart (charts)
+
+## Architecture
+
+Clean Architecture-inspired separation:
+
+### Domain
+
+- Entities/value objects such as `Product`, `Sale`, `SaleLine`, and `Insight`.
+- Deterministic, composable rule-based `InsightEngine`.
+
+### Data
+
+- Hive persistence with manual adapters.
+- Repositories mapping persistence models to domain entities.
+
+### Presentation
+
+- Riverpod controllers/providers.
+- UI renders domain output only (no insight logic in UI).
+
+## Implementation Highlights
+
+- Responsive KPI layout:
+  - Cards adapt to width and text scale.
+  - Content is clipped to rounded shapes to avoid overflow artifacts.
+- Reliable demo data generation:
+  - Seeding is idempotent and fills missing demo content even if partial data exists.
+  - UI shows stable success/error feedback per user action.
+
+## Release and Maturity Signals
+
+- Version: `1.0.0+1`
+- Changelog: `1.0.0 - 2026-02-05` (initial MVP and packaging)
+- Build targets included: Android, iOS, Web, Windows, macOS
+
+Packaging note:
+
+- Android Play Store signing is not configured yet.
+- Android release currently uses debug signing so builds run out of the box.

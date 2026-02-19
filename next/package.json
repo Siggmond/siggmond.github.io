@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "predev": "node ./scripts/sync-project-assets.mjs",
+    "dev": "next dev --webpack",
+    "predev:turbo": "node ./scripts/sync-project-assets.mjs",
+    "dev:turbo": "next dev",
     "prebuild": "node ./scripts/sync-project-assets.mjs",
     "build": "next build --webpack",
     "start": "next start",

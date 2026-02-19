@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { projects } from "@/content/projects";
-import { ProjectCard } from "@/components/ProjectCard";
+import { ProjectsTabs } from "@/components/ProjectsTabs";
 
 export const metadata: Metadata = {
-  title: "Projects · Siggmond",
-  description: "DevTools, platform surfaces, systems work, and AI tooling — organized for fast scanning.",
+  title: "Projects - Siggmond",
+  description: "DevTools, platform surfaces, systems work, and AI tooling - organized for fast scanning.",
 };
 
 export default function ProjectsPage() {
@@ -25,7 +25,7 @@ export default function ProjectsPage() {
             href="/"
             className="inline-flex items-center gap-2 rounded-lg border border-foreground/15 bg-foreground/[0.03] px-3 py-2 font-mono text-sm text-foreground/80 hover:border-foreground/25"
           >
-            ← Home
+            {"<- Home"}
           </Link>
         </div>
       </div>
@@ -34,15 +34,11 @@ export default function ProjectsPage() {
         <p className="text-sm tracking-widest uppercase text-muted-foreground font-mono">Portfolio</p>
         <h1 className="text-4xl font-semibold tracking-tight">Projects</h1>
         <p className="text-muted-foreground max-w-2xl">
-          DevTools, platform surfaces, systems work, and AI tooling — organized for fast scanning.
+          DevTools, platform surfaces, systems work, and AI tooling - organized for fast scanning.
         </p>
       </header>
 
-      <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {projects.map((p) => (
-          <ProjectCard key={p.slug} project={p} />
-        ))}
-      </section>
+      <ProjectsTabs projects={projects} />
     </main>
   );
 }

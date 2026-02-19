@@ -2,9 +2,10 @@
 @plugin "@tailwindcss/typography";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --muted-foreground: rgba(23, 23, 23, 0.66);
+  /* Force a white-forward UI palette over the dark video background */
+  --background: #0b0d12;
+  --foreground: #f8fafc;
+  --muted-foreground: rgba(248, 250, 252, 0.78);
 
   --lx1: 0.28;
   --ly1: 0.22;
@@ -23,24 +24,82 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #07070a;
-    --foreground: #ededed;
-    --muted-foreground: rgba(237, 237, 237, 0.7);
-  }
+html,
+body {
+  min-height: 100%;
 }
 
 body {
-  background: var(--background);
+  background: transparent;
   color: var(--foreground);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji",
     "Segoe UI Emoji";
 }
 
+/* Fixed full-viewport video layer behind all content */
+.bg-video {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--background);
+}
+
+/* Keep the video covering the viewport at every screen size */
+.bg-video__media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(1.05) contrast(1.04);
+}
+
+/* Dark overlay above the video for text contrast */
+.bg-video__overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(8, 12, 18, 0.14), rgba(8, 12, 18, 0.34)),
+    radial-gradient(1200px 800px at 50% 40%, rgba(6, 8, 12, 0.1), rgba(6, 8, 12, 0.3));
+}
+
 .site-content {
   position: relative;
   z-index: 1;
+}
+
+.highlight-card {
+  border: 1px solid color-mix(in srgb, #ffffff 42%, transparent);
+  background: color-mix(in srgb, #ffffff 14%, transparent);
+  box-shadow:
+    0 14px 34px rgba(2, 6, 23, 0.24),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.highlight-card:hover {
+  border-color: color-mix(in srgb, #dff8ff 78%, transparent);
+  background: color-mix(in srgb, #ffffff 20%, transparent);
+  box-shadow:
+    0 20px 42px rgba(2, 6, 23, 0.3),
+    0 0 34px rgba(125, 211, 252, 0.2);
+  transform: translateY(-1px);
+}
+
+.highlight-card-active {
+  border-color: color-mix(in srgb, #dff8ff 92%, transparent);
+  background: color-mix(in srgb, #ffffff 24%, transparent);
+  box-shadow:
+    0 24px 50px rgba(14, 116, 144, 0.35),
+    0 0 42px rgba(56, 189, 248, 0.34);
 }
 
 .bg-lighting {
@@ -117,6 +176,25 @@ body {
 @media (prefers-reduced-motion: reduce) {
   :root {
     --intensity: 1.1;
+  }
+}
+
+@media (max-width: 768px) {
+  .highlight-card {
+    box-shadow:
+      0 12px 26px rgba(2, 6, 23, 0.22),
+      0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+    transform: none;
+  }
+
+  .highlight-card:hover {
+    transform: none;
+  }
+
+  .bg-video__overlay {
+    background:
+      linear-gradient(to bottom, rgba(8, 12, 18, 0.2), rgba(8, 12, 18, 0.4)),
+      radial-gradient(900px 600px at 50% 35%, rgba(6, 8, 12, 0.12), rgba(6, 8, 12, 0.34));
   }
 }
 

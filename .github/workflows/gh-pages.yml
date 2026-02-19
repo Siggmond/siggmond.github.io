@@ -35,6 +35,18 @@ jobs:
         run: npm ci
         working-directory: next
 
+      - name: Download demo videos
+        shell: bash
+        run: |
+          set -e
+          mkdir -p next/public/projects/novacommerce/demo-videos
+          mkdir -p next/public/projects/gen-zero/demo-videos
+          mkdir -p next/public/projects/stock-pilot/demo-videos
+
+          curl -L --fail -o next/public/projects/novacommerce/demo-videos/vd1.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd1.webm"
+          curl -L --fail -o next/public/projects/gen-zero/demo-videos/vd2.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd2.webm"
+          curl -L --fail -o next/public/projects/stock-pilot/demo-videos/vd3.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd3.webm"
+
       - name: Build (static export)
         run: npm run build
         working-directory: next

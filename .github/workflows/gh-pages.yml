@@ -48,13 +48,13 @@ jobs:
           curl -L --fail -o next/public/projects/gen-zero/demo-videos/vd2.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd2.webm"
           curl -L --fail -o next/public/projects/stock-pilot/demo-videos/vd3.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd3.webm"
 
-          curl -L --fail -o next/public/projects/novacommerce/demo-videos/poster.jpg "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/poster-vd1.jpg"
-          curl -L --fail -o next/public/projects/gen-zero/demo-videos/poster.jpg "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/poster-vd2.jpg"
-          curl -L --fail -o next/public/projects/stock-pilot/demo-videos/poster.jpg "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/poster-vd3.jpg"
+          curl -L -o next/public/projects/novacommerce/demo-videos/poster.jpg "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/poster-vd1.jpg" || true
+          curl -L -o next/public/projects/gen-zero/demo-videos/poster.jpg "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/poster-vd2.jpg" || true
+          curl -L -o next/public/projects/stock-pilot/demo-videos/poster.jpg "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/poster-vd3.jpg" || true
 
-          curl -L --fail -o next/public/projects/novacommerce/demo-videos/preview.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd1_preview.webm"
-          curl -L --fail -o next/public/projects/gen-zero/demo-videos/preview.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd2_preview.webm"
-          curl -L --fail -o next/public/projects/stock-pilot/demo-videos/preview.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd3_preview.webm"
+          curl -L -o next/public/projects/novacommerce/demo-videos/preview.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd1_preview.webm" || true
+          curl -L -o next/public/projects/gen-zero/demo-videos/preview.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd2_preview.webm" || true
+          curl -L -o next/public/projects/stock-pilot/demo-videos/preview.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd3_preview.webm" || true
 
       - name: Build (static export)
         run: npm run build

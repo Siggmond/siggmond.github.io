@@ -555,7 +555,7 @@ reposcope analyze .
       "Model intent misclassification in on-device navigation suggestions.",
     ],
     thumbnail: "/projects/novacommerce/home-page-1.png",
-    demoVideo: "/projects/novacommerce/demo-videos/vd1.webm",
+    demoVideo: "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd1.webm?raw=1",
     screenshots: [
       { src: "/projects/novacommerce/sign-in-page.png", caption: "Sign In" },
       { src: "/projects/novacommerce/home-page-1.png", caption: "Home" },
@@ -654,7 +654,7 @@ Data
 - Boxes: products, daily_sales, settings.
     `,
     thumbnail: "/projects/stock-pilot/dashboard-1.png",
-    demoVideo: "/projects/stock-pilot/demo-videos/vd3.webm",
+    demoVideo: "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd3.webm?raw=1",
     screenshots: [
       { src: "/projects/stock-pilot/welcome-1.png", caption: "Onboarding Step 1" },
       { src: "/projects/stock-pilot/welcome-2.png", caption: "Onboarding Step 2" },
@@ -733,7 +733,7 @@ Presentation
 - UI renders domain outputs; insight logic stays outside UI.
     `,
     thumbnail: "/projects/gen-zero/Home-Feed-4.png",
-    demoVideo: "/projects/gen-zero/demo-videos/vd2.webm",
+    demoVideo: "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd2.webm?raw=1",
     screenshots: [
       { src: "/projects/gen-zero/Welcome-screen.png", caption: "Welcome Screen" },
       { src: "/projects/gen-zero/Home-Feed-2.png", caption: "Home Feed 2" },

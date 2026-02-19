@@ -167,6 +167,8 @@ export function Lightbox({ images, startIndex, demoVideoSrc, startWithDemo = fal
               src={assetPath(demoVideoSrc)}
               controls
               autoPlay
+              muted
+              loop
               playsInline
               preload="metadata"
             />

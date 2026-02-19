@@ -9,7 +9,9 @@ type IPhoneScreenshotShowcaseProps = {
   items: Screenshot[];
   title?: string;
   frameSrc?: string;
-  demoVideoSrc?: string;
+  posterSrc?: string;
+  previewVideoSrc?: string;
+  fullVideoSrc?: string;
 };
 
 function fallbackCaption(src: string) {
@@ -23,7 +25,9 @@ export function IPhoneScreenshotShowcase({
   items,
   title = "NovaCommerce",
   frameSrc = "/devices/iphone12pro-frame-clean.png",
-  demoVideoSrc,
+  posterSrc,
+  previewVideoSrc,
+  fullVideoSrc,
 }: IPhoneScreenshotShowcaseProps) {
   const TRANSITION_MS = 280;
   const screenshots = useMemo(() => items.filter((it) => Boolean(it.src)), [items]);
@@ -32,6 +36,7 @@ export function IPhoneScreenshotShowcase({
   const [previousIndex, setPreviousIndex] = useState<number | null>(null);
   const [isTransitionActive, setIsTransitionActive] = useState(false);
   const [isShowingDemo, setIsShowingDemo] = useState(false);
+  const [isFullDemoLoaded, setIsFullDemoLoaded] = useState(false);
   const transitionTimerRef = useRef<number | null>(null);
   const currentIndexRef = useRef(0);
   const total = screenshots.length;
@@ -101,6 +106,8 @@ export function IPhoneScreenshotShowcase({
   const previousSrc = previousIndex !== null ? screenshotSources[previousIndex] : null;
   const caption = active.caption ?? fallbackCaption(active.src);
   const displayCaption = isShowingDemo ? "Demo Video" : caption;
+  const demoSrc = isFullDemoLoaded && fullVideoSrc ? fullVideoSrc : previewVideoSrc;
+  const hasDemo = Boolean(previewVideoSrc || fullVideoSrc);
 
   return (
     <aside className="highlight-card rounded-2xl p-5">
@@ -119,16 +126,17 @@ export function IPhoneScreenshotShowcase({
                 borderRadius: "34px",
               }}
             >
-              {isShowingDemo && demoVideoSrc ? (
+              {isShowingDemo && demoSrc ? (
                 <video
-                  src={assetPath(demoVideoSrc)}
+                  src={assetPath(demoSrc)}
+                  poster={posterSrc ? assetPath(posterSrc) : undefined}
                   className="h-full w-full object-cover"
-                  controls
                   autoPlay
-                  muted
-                  loop
+                  controls={isFullDemoLoaded}
+                  muted={!isFullDemoLoaded}
+                  loop={!isFullDemoLoaded}
                   playsInline
-                  preload="metadata"
+                  preload={isFullDemoLoaded ? "metadata" : "none"}
                 />
               ) : (
                 <div className="relative h-full w-full">
@@ -192,15 +200,34 @@ export function IPhoneScreenshotShowcase({
         </button>
       </div>
 
-      {demoVideoSrc ? (
+      {hasDemo ? (
         <div className="mt-3 flex justify-center">
           <button
             type="button"
-            onClick={() => setIsShowingDemo((prev) => !prev)}
+            onClick={() => {
+              if (isShowingDemo) {
+                setIsShowingDemo(false);
+                setIsFullDemoLoaded(false);
+                return;
+              }
+              setIsShowingDemo(true);
+            }}
             aria-pressed={isShowingDemo}
             className="rounded-lg border border-foreground/15 px-3 py-2 text-xs font-mono uppercase tracking-wide hover:border-foreground/30"
           >
             {isShowingDemo ? "Images" : "Demo"}
+          </button>
+        </div>
+      ) : null}
+
+      {isShowingDemo && !isFullDemoLoaded && fullVideoSrc ? (
+        <div className="mt-2 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setIsFullDemoLoaded(true)}
+            className="rounded-lg border border-foreground/15 px-3 py-2 text-xs font-mono uppercase tracking-wide hover:border-foreground/30"
+          >
+            Play full demo
           </button>
         </div>
       ) : null}

@@ -75,7 +75,9 @@ export function AppsSection({ apps }: AppsSectionProps) {
             key={activeApp.slug}
             items={activeApp.screenshots ?? []}
             title={activeApp.title}
-            demoVideoSrc={activeApp.demoVideo}
+            posterSrc={activeApp.posterSrc}
+            previewVideoSrc={activeApp.previewVideoSrc}
+            fullVideoSrc={activeApp.fullVideoSrc}
           />
         </div>
       </div>

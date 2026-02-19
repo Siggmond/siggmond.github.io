@@ -39,13 +39,22 @@ jobs:
         shell: bash
         run: |
           set -e
+          RELEASE_TAG="v1.0"
           mkdir -p next/public/projects/novacommerce/demo-videos
           mkdir -p next/public/projects/gen-zero/demo-videos
           mkdir -p next/public/projects/stock-pilot/demo-videos
 
-          curl -L --fail -o next/public/projects/novacommerce/demo-videos/vd1.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd1.webm"
-          curl -L --fail -o next/public/projects/gen-zero/demo-videos/vd2.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd2.webm"
-          curl -L --fail -o next/public/projects/stock-pilot/demo-videos/vd3.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd3.webm"
+          curl -L --fail -o next/public/projects/novacommerce/demo-videos/vd1.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd1.webm"
+          curl -L --fail -o next/public/projects/gen-zero/demo-videos/vd2.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd2.webm"
+          curl -L --fail -o next/public/projects/stock-pilot/demo-videos/vd3.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd3.webm"
+
+          curl -L --fail -o next/public/projects/novacommerce/demo-videos/poster.jpg "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/poster-vd1.jpg"
+          curl -L --fail -o next/public/projects/gen-zero/demo-videos/poster.jpg "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/poster-vd2.jpg"
+          curl -L --fail -o next/public/projects/stock-pilot/demo-videos/poster.jpg "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/poster-vd3.jpg"
+
+          curl -L --fail -o next/public/projects/novacommerce/demo-videos/preview.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd1_preview.webm"
+          curl -L --fail -o next/public/projects/gen-zero/demo-videos/preview.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd2_preview.webm"
+          curl -L --fail -o next/public/projects/stock-pilot/demo-videos/preview.webm "https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd3_preview.webm"
 
       - name: Build (static export)
         run: npm run build

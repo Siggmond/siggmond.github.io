@@ -7,24 +7,41 @@ import { assetPath } from "@/lib/assetPath";
 type LightboxProps = {
   images: string[];
   startIndex: number;
-  demoVideoSrc?: string;
+  posterSrc?: string;
+  previewVideoSrc?: string;
+  fullVideoSrc?: string;
   startWithDemo?: boolean;
   onClose: () => void;
 };
 
-export function Lightbox({ images, startIndex, demoVideoSrc, startWithDemo = false, onClose }: LightboxProps) {
+export function Lightbox({
+  images,
+  startIndex,
+  posterSrc,
+  previewVideoSrc,
+  fullVideoSrc,
+  startWithDemo = false,
+  onClose,
+}: LightboxProps) {
   const [index, setIndex] = useState(startIndex);
-  const [showDemo, setShowDemo] = useState(Boolean(startWithDemo && demoVideoSrc));
+  const [showDemo, setShowDemo] = useState(Boolean(startWithDemo && (previewVideoSrc || fullVideoSrc)));
+  const [isFullDemoLoaded, setIsFullDemoLoaded] = useState(false);
   const dialogRef = useRef<HTMLDivElement | null>(null);
-  const hasDemo = Boolean(demoVideoSrc);
+  const hasDemo = Boolean(previewVideoSrc || fullVideoSrc);
 
   useEffect(() => {
     setIndex(startIndex);
   }, [startIndex]);
 
   useEffect(() => {
-    setShowDemo(Boolean(startWithDemo && demoVideoSrc));
-  }, [startWithDemo, demoVideoSrc]);
+    setShowDemo(Boolean(startWithDemo && (previewVideoSrc || fullVideoSrc)));
+  }, [startWithDemo, previewVideoSrc, fullVideoSrc]);
+
+  useEffect(() => {
+    if (!showDemo) {
+      setIsFullDemoLoaded(false);
+    }
+  }, [showDemo]);
 
   const count = images.length;
 
@@ -106,6 +123,7 @@ export function Lightbox({ images, startIndex, demoVideoSrc, startWithDemo = fal
   if (!images.length && !hasDemo) return null;
 
   const currentSrc = images[index] ?? images[0] ?? "";
+  const demoSrc = isFullDemoLoaded && fullVideoSrc ? fullVideoSrc : previewVideoSrc;
 
   return (
     <div
@@ -137,7 +155,14 @@ export function Lightbox({ images, startIndex, demoVideoSrc, startWithDemo = fal
               <button
                 type="button"
                 className="lightbox-button"
-                onClick={() => setShowDemo((cur) => !cur)}
+                onClick={() => {
+                  if (showDemo) {
+                    setShowDemo(false);
+                    setIsFullDemoLoaded(false);
+                    return;
+                  }
+                  setShowDemo(true);
+                }}
                 aria-pressed={showDemo}
                 aria-label={showDemo ? "Show screenshots" : "Show demo video"}
               >
@@ -161,17 +186,32 @@ export function Lightbox({ images, startIndex, demoVideoSrc, startWithDemo = fal
         </div>
 
         <div className="lightbox-stage">
-          {showDemo && demoVideoSrc ? (
-            <video
-              className="lightbox-image"
-              src={assetPath(demoVideoSrc)}
-              controls
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-            />
+          {showDemo && demoSrc ? (
+            <div className="flex h-full w-full flex-col gap-3">
+              <video
+                className="lightbox-image"
+                src={assetPath(demoSrc)}
+                poster={posterSrc ? assetPath(posterSrc) : undefined}
+                controls
+                autoPlay
+                muted={!isFullDemoLoaded}
+                loop={!isFullDemoLoaded}
+                playsInline
+                preload={isFullDemoLoaded ? "metadata" : "none"}
+              />
+              {!isFullDemoLoaded && fullVideoSrc ? (
+                <div className="flex justify-center">
+                  <button
+                    type="button"
+                    className="lightbox-button"
+                    onClick={() => setIsFullDemoLoaded(true)}
+                    aria-label="Load and play full demo video"
+                  >
+                    Play full demo
+                  </button>
+                </div>
+              ) : null}
+            </div>
           ) : (
             <img className="lightbox-image" src={assetPath(currentSrc)} alt="" />
           )}

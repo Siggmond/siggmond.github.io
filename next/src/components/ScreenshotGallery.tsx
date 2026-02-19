@@ -16,11 +16,15 @@ type ScreenshotGalleryLayout = "grid" | "compact-strip";
 export function ScreenshotGallery({
   items,
   layout = "grid",
-  demoVideoSrc,
+  posterSrc,
+  previewVideoSrc,
+  fullVideoSrc,
 }: {
   items: Screenshot[];
   layout?: ScreenshotGalleryLayout;
-  demoVideoSrc?: string;
+  posterSrc?: string;
+  previewVideoSrc?: string;
+  fullVideoSrc?: string;
 }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [startWithDemo, setStartWithDemo] = useState(false);
@@ -41,7 +45,7 @@ export function ScreenshotGallery({
     <section className="mt-10">
       <div className="flex items-center justify-between gap-3">
         <div className="text-sm tracking-widest uppercase text-muted-foreground font-mono">Screenshots</div>
-        {demoVideoSrc ? (
+        {previewVideoSrc || fullVideoSrc ? (
           <button
             type="button"
             className="rounded-md border border-foreground/15 px-3 py-1.5 text-xs font-mono uppercase tracking-wide hover:border-foreground/30"
@@ -94,7 +98,9 @@ export function ScreenshotGallery({
         <Lightbox
           images={images}
           startIndex={openIndex}
-          demoVideoSrc={demoVideoSrc}
+          posterSrc={posterSrc}
+          previewVideoSrc={previewVideoSrc}
+          fullVideoSrc={fullVideoSrc}
           startWithDemo={startWithDemo}
           onClose={() => {
             setOpenIndex(null);

@@ -130,7 +130,13 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         ) : null}
       </div>
 
-      <ScreenshotGallery items={screenshots} layout={screenshotLayout} demoVideoSrc={project.demoVideo} />
+      <ScreenshotGallery
+        items={screenshots}
+        layout={screenshotLayout}
+        posterSrc={project.posterSrc}
+        previewVideoSrc={project.previewVideoSrc}
+        fullVideoSrc={project.fullVideoSrc}
+      />
 
       {rendered.html ? (
         <article className="prose prose-invert mt-10 max-w-none text-foreground">

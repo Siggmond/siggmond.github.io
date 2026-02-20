@@ -37,6 +37,7 @@ export function IPhoneScreenshotShowcase({
   const [isTransitionActive, setIsTransitionActive] = useState(false);
   const [isShowingDemo, setIsShowingDemo] = useState(false);
   const [isFullDemoLoaded, setIsFullDemoLoaded] = useState(false);
+  const [hasStartedFullDemo, setHasStartedFullDemo] = useState(false);
   const transitionTimerRef = useRef<number | null>(null);
   const currentIndexRef = useRef(0);
   const total = screenshots.length;
@@ -154,6 +155,11 @@ export function IPhoneScreenshotShowcase({
                       setIsFullDemoLoaded(false);
                     }
                   }}
+                  onPlay={() => {
+                    if (isFullDemoLoaded) {
+                      setHasStartedFullDemo(true);
+                    }
+                  }}
                 />
               ) : (
                 <div className="relative h-full w-full">
@@ -225,6 +231,7 @@ export function IPhoneScreenshotShowcase({
               if (isShowingDemo) {
                 setIsShowingDemo(false);
                 setIsFullDemoLoaded(false);
+                setHasStartedFullDemo(false);
                 return;
               }
               setIsShowingDemo(true);
@@ -237,7 +244,7 @@ export function IPhoneScreenshotShowcase({
         </div>
       ) : null}
 
-      {isShowingDemo && !isFullDemoLoaded && fullVideoSrc ? (
+      {isShowingDemo && !hasStartedFullDemo && fullVideoSrc ? (
         <div className="mt-2 flex justify-center">
           <button
             type="button"

@@ -26,6 +26,7 @@ export function Lightbox({
   const [index, setIndex] = useState(startIndex);
   const [showDemo, setShowDemo] = useState(Boolean(startWithDemo && (previewVideoSrc || fullVideoSrc)));
   const [isFullDemoLoaded, setIsFullDemoLoaded] = useState(false);
+  const [hasStartedFullDemo, setHasStartedFullDemo] = useState(false);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const hasDemo = Boolean(previewVideoSrc || fullVideoSrc);
 
@@ -40,6 +41,7 @@ export function Lightbox({
   useEffect(() => {
     if (!showDemo) {
       setIsFullDemoLoaded(false);
+      setHasStartedFullDemo(false);
     }
   }, [showDemo]);
 
@@ -215,8 +217,13 @@ export function Lightbox({
                     setIsFullDemoLoaded(false);
                   }
                 }}
+                onPlay={() => {
+                  if (isFullDemoLoaded) {
+                    setHasStartedFullDemo(true);
+                  }
+                }}
               />
-              {!isFullDemoLoaded && fullVideoSrc ? (
+              {!hasStartedFullDemo && fullVideoSrc ? (
                 <div className="flex justify-center">
                   <button
                     type="button"

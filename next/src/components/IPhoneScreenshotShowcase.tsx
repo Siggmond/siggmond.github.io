@@ -37,10 +37,15 @@ export function IPhoneScreenshotShowcase({
   const [isTransitionActive, setIsTransitionActive] = useState(false);
   const [isShowingDemo, setIsShowingDemo] = useState(false);
   const [isFullDemoLoaded, setIsFullDemoLoaded] = useState(false);
+  const [isFullDemoAvailable, setIsFullDemoAvailable] = useState(false);
   const [hasStartedFullDemo, setHasStartedFullDemo] = useState(false);
   const transitionTimerRef = useRef<number | null>(null);
   const currentIndexRef = useRef(0);
+  const demoVideoRef = useRef<HTMLVideoElement | null>(null);
+  const pendingDemoSeekTimeRef = useRef<number | null>(null);
   const total = screenshots.length;
+  const shouldPlayFullDemo = isFullDemoLoaded && isFullDemoAvailable && Boolean(fullVideoSrc);
+  const demoSrc = shouldPlayFullDemo && fullVideoSrc ? fullVideoSrc : previewVideoSrc;
 
   useEffect(() => {
     currentIndexRef.current = currentIndex;
@@ -61,6 +66,79 @@ export function IPhoneScreenshotShowcase({
       }
     };
   }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let isCancelled = false;
+
+    const checkFullDemo = async () => {
+      if (!fullVideoSrc) {
+        if (!isCancelled) {
+          setIsFullDemoAvailable(false);
+        }
+        return;
+      }
+
+      const fullUrl = assetPath(fullVideoSrc);
+      if (!isCancelled) {
+        setIsFullDemoAvailable(false);
+      }
+
+      try {
+        const headResponse = await fetch(fullUrl, {
+          method: "HEAD",
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (!isCancelled && headResponse.ok) {
+          setIsFullDemoAvailable(true);
+          return;
+        }
+      } catch {
+        // Fallback request below handles servers that block HEAD.
+      }
+
+      try {
+        const rangeResponse = await fetch(fullUrl, {
+          method: "GET",
+          headers: { Range: "bytes=0-0" },
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (!isCancelled) {
+          setIsFullDemoAvailable(rangeResponse.ok || rangeResponse.status === 206);
+        }
+      } catch {
+        if (!isCancelled) {
+          setIsFullDemoAvailable(false);
+        }
+      }
+    };
+    void checkFullDemo();
+
+    return () => {
+      isCancelled = true;
+      controller.abort();
+    };
+  }, [fullVideoSrc]);
+
+  useEffect(() => {
+    if (!isShowingDemo || !demoSrc) {
+      return;
+    }
+    const video = demoVideoRef.current;
+    if (!video) {
+      return;
+    }
+    video.load();
+    const playAttempt = video.play();
+    if (playAttempt && typeof playAttempt.catch === "function") {
+      playAttempt.catch(() => {
+        video.muted = true;
+        void video.play();
+      });
+    }
+  }, [isShowingDemo, demoSrc]);
 
   const transitionTo = (nextIndex: number) => {
     if (!total) {
@@ -107,7 +185,6 @@ export function IPhoneScreenshotShowcase({
   const previousSrc = previousIndex !== null ? screenshotSources[previousIndex] : null;
   const caption = active.caption ?? fallbackCaption(active.src);
   const displayCaption = isShowingDemo ? "Demo Video" : caption;
-  const demoSrc = isFullDemoLoaded && fullVideoSrc ? fullVideoSrc : previewVideoSrc;
   const hasDemo = Boolean(previewVideoSrc || fullVideoSrc);
 
   return (
@@ -129,35 +206,36 @@ export function IPhoneScreenshotShowcase({
             >
               {isShowingDemo && demoSrc ? (
                 <video
-                  key={demoSrc}
+                  ref={demoVideoRef}
                   src={assetPath(demoSrc)}
                   poster={posterSrc ? assetPath(posterSrc) : undefined}
                   className="h-full w-full object-cover"
                   autoPlay
-                  controls={isFullDemoLoaded}
-                  muted={!isFullDemoLoaded}
-                  loop={!isFullDemoLoaded}
+                  controls={shouldPlayFullDemo}
+                  muted={!shouldPlayFullDemo}
+                  loop={!shouldPlayFullDemo}
                   playsInline
-                  preload={isFullDemoLoaded ? "metadata" : "none"}
-                  onLoadedData={(event) => {
-                    if (!isFullDemoLoaded) return;
+                  preload={shouldPlayFullDemo ? "metadata" : "none"}
+                  onLoadedMetadata={(event) => {
+                    if (!shouldPlayFullDemo) return;
+                    const savedTime = pendingDemoSeekTimeRef.current;
+                    if (savedTime === null) return;
                     const video = event.currentTarget;
-                    const playAttempt = video.play();
-                    if (playAttempt && typeof playAttempt.catch === "function") {
-                      playAttempt.catch(() => {
-                        video.muted = true;
-                        void video.play();
-                      });
+                    if (Number.isFinite(video.duration) && video.duration > 0) {
+                      video.currentTime = Math.min(savedTime, Math.max(video.duration - 0.25, 0));
+                    } else {
+                      video.currentTime = savedTime;
                     }
+                    pendingDemoSeekTimeRef.current = null;
                   }}
                   onError={() => {
-                    if (isFullDemoLoaded) {
+                    if (shouldPlayFullDemo) {
                       setIsFullDemoLoaded(false);
                       setHasStartedFullDemo(false);
                     }
                   }}
                   onPlay={() => {
-                    if (isFullDemoLoaded) {
+                    if (shouldPlayFullDemo) {
                       setHasStartedFullDemo(true);
                     }
                   }}
@@ -245,11 +323,15 @@ export function IPhoneScreenshotShowcase({
         </div>
       ) : null}
 
-      {isShowingDemo && !hasStartedFullDemo && fullVideoSrc ? (
+      {isShowingDemo && !hasStartedFullDemo && isFullDemoAvailable && fullVideoSrc ? (
         <div className="mt-2 flex justify-center">
           <button
             type="button"
-            onClick={() => setIsFullDemoLoaded(true)}
+            onClick={() => {
+              const video = demoVideoRef.current;
+              pendingDemoSeekTimeRef.current = video ? video.currentTime : null;
+              setIsFullDemoLoaded(true);
+            }}
             className="rounded-lg border border-foreground/15 px-3 py-2 text-xs font-mono uppercase tracking-wide hover:border-foreground/30"
           >
             Play full demo

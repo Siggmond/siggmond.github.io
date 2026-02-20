@@ -26,9 +26,14 @@ export function Lightbox({
   const [index, setIndex] = useState(startIndex);
   const [showDemo, setShowDemo] = useState(Boolean(startWithDemo && (previewVideoSrc || fullVideoSrc)));
   const [isFullDemoLoaded, setIsFullDemoLoaded] = useState(false);
+  const [isFullDemoAvailable, setIsFullDemoAvailable] = useState(false);
   const [hasStartedFullDemo, setHasStartedFullDemo] = useState(false);
   const dialogRef = useRef<HTMLDivElement | null>(null);
+  const demoVideoRef = useRef<HTMLVideoElement | null>(null);
+  const pendingDemoSeekTimeRef = useRef<number | null>(null);
   const hasDemo = Boolean(previewVideoSrc || fullVideoSrc);
+  const shouldPlayFullDemo = isFullDemoLoaded && isFullDemoAvailable && Boolean(fullVideoSrc);
+  const demoSrc = shouldPlayFullDemo && fullVideoSrc ? fullVideoSrc : previewVideoSrc;
 
   useEffect(() => {
     setIndex(startIndex);
@@ -44,6 +49,79 @@ export function Lightbox({
       setHasStartedFullDemo(false);
     }
   }, [showDemo]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let isCancelled = false;
+
+    const checkFullDemo = async () => {
+      if (!fullVideoSrc) {
+        if (!isCancelled) {
+          setIsFullDemoAvailable(false);
+        }
+        return;
+      }
+
+      const fullUrl = assetPath(fullVideoSrc);
+      if (!isCancelled) {
+        setIsFullDemoAvailable(false);
+      }
+
+      try {
+        const headResponse = await fetch(fullUrl, {
+          method: "HEAD",
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (!isCancelled && headResponse.ok) {
+          setIsFullDemoAvailable(true);
+          return;
+        }
+      } catch {
+        // Fallback request below handles servers that block HEAD.
+      }
+
+      try {
+        const rangeResponse = await fetch(fullUrl, {
+          method: "GET",
+          headers: { Range: "bytes=0-0" },
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (!isCancelled) {
+          setIsFullDemoAvailable(rangeResponse.ok || rangeResponse.status === 206);
+        }
+      } catch {
+        if (!isCancelled) {
+          setIsFullDemoAvailable(false);
+        }
+      }
+    };
+    void checkFullDemo();
+
+    return () => {
+      isCancelled = true;
+      controller.abort();
+    };
+  }, [fullVideoSrc]);
+
+  useEffect(() => {
+    if (!showDemo || !demoSrc) {
+      return;
+    }
+    const video = demoVideoRef.current;
+    if (!video) {
+      return;
+    }
+    video.load();
+    const playAttempt = video.play();
+    if (playAttempt && typeof playAttempt.catch === "function") {
+      playAttempt.catch(() => {
+        video.muted = true;
+        void video.play();
+      });
+    }
+  }, [showDemo, demoSrc]);
 
   const count = images.length;
 
@@ -125,7 +203,6 @@ export function Lightbox({
   if (!images.length && !hasDemo) return null;
 
   const currentSrc = images[index] ?? images[0] ?? "";
-  const demoSrc = isFullDemoLoaded && fullVideoSrc ? fullVideoSrc : previewVideoSrc;
 
   return (
     <div
@@ -191,45 +268,50 @@ export function Lightbox({
           {showDemo && demoSrc ? (
             <div className="flex h-full w-full flex-col gap-3">
               <video
-                key={demoSrc}
+                ref={demoVideoRef}
                 className="lightbox-image"
                 src={assetPath(demoSrc)}
                 poster={posterSrc ? assetPath(posterSrc) : undefined}
-                controls
+                controls={shouldPlayFullDemo}
                 autoPlay
-                muted={!isFullDemoLoaded}
-                loop={!isFullDemoLoaded}
+                muted={!shouldPlayFullDemo}
+                loop={!shouldPlayFullDemo}
                 playsInline
-                preload={isFullDemoLoaded ? "metadata" : "none"}
-                onLoadedData={(event) => {
-                  if (!isFullDemoLoaded) return;
+                preload={shouldPlayFullDemo ? "metadata" : "none"}
+                onLoadedMetadata={(event) => {
+                  if (!shouldPlayFullDemo) return;
+                  const savedTime = pendingDemoSeekTimeRef.current;
+                  if (savedTime === null) return;
                   const video = event.currentTarget;
-                  const playAttempt = video.play();
-                  if (playAttempt && typeof playAttempt.catch === "function") {
-                    playAttempt.catch(() => {
-                      video.muted = true;
-                      void video.play();
-                    });
+                  if (Number.isFinite(video.duration) && video.duration > 0) {
+                    video.currentTime = Math.min(savedTime, Math.max(video.duration - 0.25, 0));
+                  } else {
+                    video.currentTime = savedTime;
                   }
+                  pendingDemoSeekTimeRef.current = null;
                 }}
                 onError={() => {
-                  if (isFullDemoLoaded) {
+                  if (shouldPlayFullDemo) {
                     setIsFullDemoLoaded(false);
                     setHasStartedFullDemo(false);
                   }
                 }}
                 onPlay={() => {
-                  if (isFullDemoLoaded) {
+                  if (shouldPlayFullDemo) {
                     setHasStartedFullDemo(true);
                   }
                 }}
               />
-              {!hasStartedFullDemo && fullVideoSrc ? (
+              {!hasStartedFullDemo && isFullDemoAvailable && fullVideoSrc ? (
                 <div className="flex justify-center">
                   <button
                     type="button"
                     className="lightbox-button"
-                    onClick={() => setIsFullDemoLoaded(true)}
+                    onClick={() => {
+                      const video = demoVideoRef.current;
+                      pendingDemoSeekTimeRef.current = video ? video.currentTime : null;
+                      setIsFullDemoLoaded(true);
+                    }}
                     aria-label="Load and play full demo video"
                   >
                     Play full demo

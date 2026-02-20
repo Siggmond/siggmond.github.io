@@ -198,6 +198,22 @@ export function Lightbox({
                 loop={!isFullDemoLoaded}
                 playsInline
                 preload={isFullDemoLoaded ? "metadata" : "none"}
+                onLoadedData={(event) => {
+                  if (!isFullDemoLoaded) return;
+                  const video = event.currentTarget;
+                  const playAttempt = video.play();
+                  if (playAttempt && typeof playAttempt.catch === "function") {
+                    playAttempt.catch(() => {
+                      video.muted = true;
+                      void video.play();
+                    });
+                  }
+                }}
+                onError={() => {
+                  if (isFullDemoLoaded) {
+                    setIsFullDemoLoaded(false);
+                  }
+                }}
               />
               {!isFullDemoLoaded && fullVideoSrc ? (
                 <div className="flex justify-center">

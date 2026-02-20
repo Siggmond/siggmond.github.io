@@ -3,8 +3,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { getProject, projects } from "@/content/projects";
+import { getProjectCaseStudy } from "@/content/projects/caseStudies";
 import { renderProjectMdx } from "@/lib/mdx";
 import { BackToProjectsButton } from "@/components/BackToProjectsButton";
+import { CaseStudyBadges, CaseStudyHeroMetrics, ProjectCaseStudySections } from "@/components/ProjectCaseStudySections";
 import { ScreenshotGallery } from "@/components/ScreenshotGallery";
 
 export function generateStaticParams() {
@@ -43,6 +45,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   const { slug } = await params;
   const project = getProject(slug);
   if (!project) return notFound();
+  const caseStudy = getProjectCaseStudy(project.slug);
 
   let rendered = { html: "", frontmatter: {} as Record<string, unknown> };
   if (project.hasMdx) {
@@ -52,10 +55,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
       if (process.env.NODE_ENV === "development") {
         const expected = `src/content/projects/${project.slug}.mdx`;
         if (project.slug === "reposcope-ai") {
-          // eslint-disable-next-line no-console
           console.warn(`[MDX] not found for slug ${project.slug} at ${expected}`, err);
         } else {
-          // eslint-disable-next-line no-console
           console.warn(`[MDX] failed to load for slug ${project.slug} at ${expected}`, err);
         }
       }
@@ -72,7 +73,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   const screenshotLayout = project.type === "application" ? "compact-strip" : "grid";
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-16">
+    <main className="mx-auto w-full max-w-5xl px-6 py-20 text-base leading-relaxed">
       <div className="sticky top-0 z-10 -mx-6 mb-8 border-b border-foreground/10 bg-background/70 px-6 py-4 backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <nav className="text-sm text-muted-foreground">
@@ -90,16 +91,18 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         </div>
       </div>
 
-      <header className="space-y-3">
+      <header className="max-w-[72ch] space-y-4">
         <p className="text-sm tracking-widest uppercase text-muted-foreground font-mono">Case study</p>
-        <h1 className="text-4xl font-semibold tracking-tight">{project.title}</h1>
-        <p className="text-muted-foreground">{project.summary}</p>
+        <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">{project.title}</h1>
+        <p className="text-foreground/90">{project.summary}</p>
+        {caseStudy ? <CaseStudyBadges badges={caseStudy.badges} /> : null}
       </header>
 
-      <div className="highlight-card mt-6 rounded-2xl p-6">
+      {caseStudy ? <CaseStudyHeroMetrics metrics={caseStudy.heroMetrics} /> : null}
+
+      <div className="case-card mt-7 rounded-2xl p-5">
         <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
           {project.year ? <span>{project.year}</span> : null}
-          {project.stack ? <span>{project.stack}</span> : null}
           {project.determinism ? <span>Determinism: {project.determinism}</span> : null}
           {project.status ? <span>Lifecycle: {project.status}</span> : null}
         </div>
@@ -138,12 +141,14 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         fullVideoSrc={project.fullVideoSrc}
       />
 
-      {rendered.html ? (
+      {caseStudy ? (
+        <ProjectCaseStudySections study={caseStudy} />
+      ) : rendered.html ? (
         <article className="prose prose-invert mt-10 max-w-none text-foreground">
           <div dangerouslySetInnerHTML={{ __html: rendered.html }} />
         </article>
       ) : (
-        <section className="mt-10 space-y-6">
+        <section className="mt-10 max-w-[72ch] space-y-6">
           {project.why ? (
             <div>
               <div className="text-sm tracking-widest uppercase text-muted-foreground font-mono">Why</div>
@@ -201,9 +206,9 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
       )}
 
       {project.architecture ? (
-        <section className="mt-10">
+        <section className="mt-10 max-w-[72ch]">
           <div className="text-sm tracking-widest uppercase text-muted-foreground font-mono">Architecture</div>
-          <pre className="highlight-card mt-3 overflow-auto rounded-xl bg-background p-4 text-sm">
+          <pre className="case-card mt-3 overflow-auto rounded-xl p-4 text-sm">
             {project.architecture}
           </pre>
         </section>

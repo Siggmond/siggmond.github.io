@@ -32,6 +32,8 @@ body {
 body {
   background: transparent;
   color: var(--foreground);
+  font-size: 16px;
+  line-height: 1.6;
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji",
     "Segoe UI Emoji";
 }
@@ -61,8 +63,8 @@ body {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(to bottom, rgba(8, 12, 18, 0.14), rgba(8, 12, 18, 0.34)),
-    radial-gradient(1200px 800px at 50% 40%, rgba(6, 8, 12, 0.1), rgba(6, 8, 12, 0.3));
+    linear-gradient(to bottom, rgba(6, 10, 16, 0.52), rgba(6, 10, 16, 0.8)),
+    radial-gradient(1200px 800px at 50% 40%, rgba(8, 12, 18, 0.28), rgba(6, 8, 12, 0.62));
 }
 
 .site-content {
@@ -83,6 +85,45 @@ body {
     background-color 180ms ease,
     box-shadow 180ms ease,
     transform 180ms ease;
+}
+
+.case-card {
+  border: 1px solid color-mix(in srgb, #ffffff 24%, transparent);
+  background: color-mix(in srgb, #060a11 80%, transparent);
+  box-shadow:
+    0 18px 36px rgba(1, 4, 10, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition:
+    border-color 200ms ease,
+    transform 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.case-card:hover {
+  border-color: color-mix(in srgb, #e2efff 42%, transparent);
+  box-shadow:
+    0 22px 42px rgba(1, 4, 10, 0.42),
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  transform: translateY(-1px);
+}
+
+.case-reveal {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: case-reveal-in 520ms cubic-bezier(0.2, 0.75, 0.2, 1) forwards;
+}
+
+@keyframes case-reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .highlight-card:hover {
@@ -177,6 +218,20 @@ body {
   :root {
     --intensity: 1.1;
   }
+
+  .case-reveal,
+  .lightbox-overlay,
+  .lightbox-dialog {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .case-card,
+  .case-card:hover {
+    transition: none;
+    transform: none;
+  }
 }
 
 @media (max-width: 768px) {
@@ -193,8 +248,8 @@ body {
 
   .bg-video__overlay {
     background:
-      linear-gradient(to bottom, rgba(8, 12, 18, 0.2), rgba(8, 12, 18, 0.4)),
-      radial-gradient(900px 600px at 50% 35%, rgba(6, 8, 12, 0.12), rgba(6, 8, 12, 0.34));
+      linear-gradient(to bottom, rgba(6, 10, 16, 0.6), rgba(6, 10, 16, 0.86)),
+      radial-gradient(900px 600px at 50% 35%, rgba(8, 12, 18, 0.36), rgba(6, 8, 12, 0.68));
   }
 }
 

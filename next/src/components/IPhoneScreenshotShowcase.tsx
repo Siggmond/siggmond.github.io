@@ -128,6 +128,7 @@ export function IPhoneScreenshotShowcase({
             >
               {isShowingDemo && demoSrc ? (
                 <video
+                  key={demoSrc}
                   src={assetPath(demoSrc)}
                   poster={posterSrc ? assetPath(posterSrc) : undefined}
                   className="h-full w-full object-cover"

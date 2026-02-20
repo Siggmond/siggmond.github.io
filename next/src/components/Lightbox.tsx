@@ -189,6 +189,7 @@ export function Lightbox({
           {showDemo && demoSrc ? (
             <div className="flex h-full w-full flex-col gap-3">
               <video
+                key={demoSrc}
                 className="lightbox-image"
                 src={assetPath(demoSrc)}
                 poster={posterSrc ? assetPath(posterSrc) : undefined}

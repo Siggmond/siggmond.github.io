@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { assetPath } from "@/lib/assetPath";
-import { canReachVideo } from "@/lib/videoAvailability";
 
 type LightboxProps = {
   images: string[];
@@ -27,13 +26,13 @@ export function Lightbox({
   const [index, setIndex] = useState(startIndex);
   const [showDemo, setShowDemo] = useState(Boolean(startWithDemo && (previewVideoSrc || fullVideoSrc)));
   const [isFullDemoLoaded, setIsFullDemoLoaded] = useState(false);
-  const [isFullDemoAvailable, setIsFullDemoAvailable] = useState(false);
   const [hasStartedFullDemo, setHasStartedFullDemo] = useState(false);
+  const [isFullDemoUnavailable, setIsFullDemoUnavailable] = useState(false);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const demoVideoRef = useRef<HTMLVideoElement | null>(null);
   const pendingDemoSeekTimeRef = useRef<number | null>(null);
   const hasDemo = Boolean(previewVideoSrc || fullVideoSrc);
-  const shouldPlayFullDemo = isFullDemoLoaded && isFullDemoAvailable && Boolean(fullVideoSrc);
+  const shouldPlayFullDemo = isFullDemoLoaded && Boolean(fullVideoSrc);
   const demoSrc = shouldPlayFullDemo && fullVideoSrc ? fullVideoSrc : previewVideoSrc;
 
   useEffect(() => {
@@ -48,44 +47,16 @@ export function Lightbox({
     if (!showDemo) {
       setIsFullDemoLoaded(false);
       setHasStartedFullDemo(false);
+      setIsFullDemoUnavailable(false);
     }
   }, [showDemo]);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    let isCancelled = false;
-
-    const checkFullDemo = async () => {
-      if (!fullVideoSrc) {
-        if (!isCancelled) {
-          setIsFullDemoAvailable(false);
-        }
-        return;
-      }
-
-      const fullUrl = assetPath(fullVideoSrc);
-      if (!isCancelled) {
-        setIsFullDemoAvailable(false);
-      }
-
-      try {
-        const available = await canReachVideo(fullUrl, controller.signal);
-        if (!isCancelled) {
-          setIsFullDemoAvailable(available);
-        }
-      } catch {
-        if (!isCancelled) {
-          setIsFullDemoAvailable(false);
-        }
-      }
-    };
-    void checkFullDemo();
-
-    return () => {
-      isCancelled = true;
-      controller.abort();
-    };
-  }, [fullVideoSrc]);
+  const fallbackToPreview = useCallback(() => {
+    setIsFullDemoLoaded(false);
+    setHasStartedFullDemo(false);
+    setIsFullDemoUnavailable(true);
+    pendingDemoSeekTimeRef.current = null;
+  }, []);
 
   useEffect(() => {
     if (!showDemo || !demoSrc) {
@@ -99,11 +70,15 @@ export function Lightbox({
     const playAttempt = video.play();
     if (playAttempt && typeof playAttempt.catch === "function") {
       playAttempt.catch(() => {
+        if (shouldPlayFullDemo) {
+          fallbackToPreview();
+          return;
+        }
         video.muted = true;
         void video.play();
       });
     }
-  }, [showDemo, demoSrc]);
+  }, [showDemo, demoSrc, shouldPlayFullDemo, fallbackToPreview]);
 
   const count = images.length;
 
@@ -272,19 +247,19 @@ export function Lightbox({
                   }
                   pendingDemoSeekTimeRef.current = null;
                 }}
-                onError={() => {
-                  if (shouldPlayFullDemo) {
-                    setIsFullDemoLoaded(false);
-                    setHasStartedFullDemo(false);
-                  }
-                }}
-                onPlay={() => {
-                  if (shouldPlayFullDemo) {
-                    setHasStartedFullDemo(true);
-                  }
-                }}
+                  onError={() => {
+                    if (shouldPlayFullDemo) {
+                      fallbackToPreview();
+                    }
+                  }}
+                  onPlay={() => {
+                    if (shouldPlayFullDemo) {
+                      setHasStartedFullDemo(true);
+                      setIsFullDemoUnavailable(false);
+                    }
+                  }}
               />
-              {!hasStartedFullDemo && isFullDemoAvailable && fullVideoSrc ? (
+              {!hasStartedFullDemo && fullVideoSrc ? (
                 <div className="flex justify-center">
                   <button
                     type="button"
@@ -292,6 +267,7 @@ export function Lightbox({
                     onClick={() => {
                       const video = demoVideoRef.current;
                       pendingDemoSeekTimeRef.current = video ? video.currentTime : null;
+                      setIsFullDemoUnavailable(false);
                       setIsFullDemoLoaded(true);
                     }}
                     aria-label="Load and play full demo video"
@@ -299,6 +275,9 @@ export function Lightbox({
                     Play full demo
                   </button>
                 </div>
+              ) : null}
+              {isFullDemoUnavailable ? (
+                <p className="text-center text-xs text-muted-foreground">Full demo unavailable</p>
               ) : null}
             </div>
           ) : (

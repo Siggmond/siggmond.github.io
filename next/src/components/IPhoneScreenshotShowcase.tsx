@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { Screenshot } from "@/content/projects";
 import { assetPath } from "@/lib/assetPath";
-import { canReachVideo } from "@/lib/videoAvailability";
 
 type IPhoneScreenshotShowcaseProps = {
   items: Screenshot[];
@@ -38,14 +37,14 @@ export function IPhoneScreenshotShowcase({
   const [isTransitionActive, setIsTransitionActive] = useState(false);
   const [isShowingDemo, setIsShowingDemo] = useState(false);
   const [isFullDemoLoaded, setIsFullDemoLoaded] = useState(false);
-  const [isFullDemoAvailable, setIsFullDemoAvailable] = useState(false);
   const [hasStartedFullDemo, setHasStartedFullDemo] = useState(false);
+  const [isFullDemoUnavailable, setIsFullDemoUnavailable] = useState(false);
   const transitionTimerRef = useRef<number | null>(null);
   const currentIndexRef = useRef(0);
   const demoVideoRef = useRef<HTMLVideoElement | null>(null);
   const pendingDemoSeekTimeRef = useRef<number | null>(null);
   const total = screenshots.length;
-  const shouldPlayFullDemo = isFullDemoLoaded && isFullDemoAvailable && Boolean(fullVideoSrc);
+  const shouldPlayFullDemo = isFullDemoLoaded && Boolean(fullVideoSrc);
   const demoSrc = shouldPlayFullDemo && fullVideoSrc ? fullVideoSrc : previewVideoSrc;
 
   useEffect(() => {
@@ -68,41 +67,12 @@ export function IPhoneScreenshotShowcase({
     };
   }, []);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    let isCancelled = false;
-
-    const checkFullDemo = async () => {
-      if (!fullVideoSrc) {
-        if (!isCancelled) {
-          setIsFullDemoAvailable(false);
-        }
-        return;
-      }
-
-      const fullUrl = assetPath(fullVideoSrc);
-      if (!isCancelled) {
-        setIsFullDemoAvailable(false);
-      }
-
-      try {
-        const available = await canReachVideo(fullUrl, controller.signal);
-        if (!isCancelled) {
-          setIsFullDemoAvailable(available);
-        }
-      } catch {
-        if (!isCancelled) {
-          setIsFullDemoAvailable(false);
-        }
-      }
-    };
-    void checkFullDemo();
-
-    return () => {
-      isCancelled = true;
-      controller.abort();
-    };
-  }, [fullVideoSrc]);
+  const fallbackToPreview = useCallback(() => {
+    setIsFullDemoLoaded(false);
+    setHasStartedFullDemo(false);
+    setIsFullDemoUnavailable(true);
+    pendingDemoSeekTimeRef.current = null;
+  }, []);
 
   useEffect(() => {
     if (!isShowingDemo || !demoSrc) {
@@ -116,11 +86,15 @@ export function IPhoneScreenshotShowcase({
     const playAttempt = video.play();
     if (playAttempt && typeof playAttempt.catch === "function") {
       playAttempt.catch(() => {
+        if (shouldPlayFullDemo) {
+          fallbackToPreview();
+          return;
+        }
         video.muted = true;
         void video.play();
       });
     }
-  }, [isShowingDemo, demoSrc]);
+  }, [isShowingDemo, demoSrc, shouldPlayFullDemo, fallbackToPreview]);
 
   const transitionTo = (nextIndex: number) => {
     if (!total) {
@@ -212,13 +186,13 @@ export function IPhoneScreenshotShowcase({
                   }}
                   onError={() => {
                     if (shouldPlayFullDemo) {
-                      setIsFullDemoLoaded(false);
-                      setHasStartedFullDemo(false);
+                      fallbackToPreview();
                     }
                   }}
                   onPlay={() => {
                     if (shouldPlayFullDemo) {
                       setHasStartedFullDemo(true);
+                      setIsFullDemoUnavailable(false);
                     }
                   }}
                 />
@@ -293,8 +267,10 @@ export function IPhoneScreenshotShowcase({
                 setIsShowingDemo(false);
                 setIsFullDemoLoaded(false);
                 setHasStartedFullDemo(false);
+                setIsFullDemoUnavailable(false);
                 return;
               }
+              setIsFullDemoUnavailable(false);
               setIsShowingDemo(true);
             }}
             aria-pressed={isShowingDemo}
@@ -305,13 +281,14 @@ export function IPhoneScreenshotShowcase({
         </div>
       ) : null}
 
-      {isShowingDemo && !hasStartedFullDemo && isFullDemoAvailable && fullVideoSrc ? (
+      {isShowingDemo && !hasStartedFullDemo && fullVideoSrc ? (
         <div className="mt-2 flex justify-center">
           <button
             type="button"
             onClick={() => {
               const video = demoVideoRef.current;
               pendingDemoSeekTimeRef.current = video ? video.currentTime : null;
+              setIsFullDemoUnavailable(false);
               setIsFullDemoLoaded(true);
             }}
             className="rounded-lg border border-foreground/15 px-3 py-2 text-xs font-mono uppercase tracking-wide hover:border-foreground/30"
@@ -319,6 +296,9 @@ export function IPhoneScreenshotShowcase({
             Play full demo
           </button>
         </div>
+      ) : null}
+      {isShowingDemo && isFullDemoUnavailable ? (
+        <p className="mt-2 text-center text-xs text-muted-foreground">Full demo unavailable</p>
       ) : null}
 
       {!isShowingDemo ? (

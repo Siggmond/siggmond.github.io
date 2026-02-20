@@ -3,13 +3,22 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { assetPath } from "@/lib/assetPath";
+import {
+  chooseVideoQuality,
+  getDemoVideoQualityPreference,
+  getQualityFallbackSequence,
+  setDemoVideoQualityPreference,
+  type DemoVideoQuality,
+  type DemoVideoQualityPreference,
+  type FullVideoSources,
+} from "@/lib/demoVideoQuality";
 
 type LightboxProps = {
   images: string[];
   startIndex: number;
   posterSrc?: string;
   previewVideoSrc?: string;
-  fullVideoSrc?: string;
+  fullVideoSources?: FullVideoSources;
   startWithDemo?: boolean;
   onClose: () => void;
 };
@@ -19,29 +28,42 @@ export function Lightbox({
   startIndex,
   posterSrc,
   previewVideoSrc,
-  fullVideoSrc,
+  fullVideoSources,
   startWithDemo = false,
   onClose,
 }: LightboxProps) {
+  const STALL_TIMEOUT_MS = 3000;
   const [index, setIndex] = useState(startIndex);
-  const [showDemo, setShowDemo] = useState(Boolean(startWithDemo && (previewVideoSrc || fullVideoSrc)));
+  const [showDemo, setShowDemo] = useState(Boolean(startWithDemo && (previewVideoSrc || fullVideoSources)));
   const [isFullDemoLoaded, setIsFullDemoLoaded] = useState(false);
   const [hasStartedFullDemo, setHasStartedFullDemo] = useState(false);
   const [isFullDemoUnavailable, setIsFullDemoUnavailable] = useState(false);
+  const [qualityPreference, setQualityPreference] = useState<DemoVideoQualityPreference>("auto");
+  const [fullDemoQualities, setFullDemoQualities] = useState<DemoVideoQuality[]>([]);
+  const [fullDemoQualityIndex, setFullDemoQualityIndex] = useState(0);
+  const [hasCurrentFullDemoCanPlay, setHasCurrentFullDemoCanPlay] = useState(false);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const demoVideoRef = useRef<HTMLVideoElement | null>(null);
   const pendingDemoSeekTimeRef = useRef<number | null>(null);
-  const hasDemo = Boolean(previewVideoSrc || fullVideoSrc);
-  const shouldPlayFullDemo = isFullDemoLoaded && Boolean(fullVideoSrc);
-  const demoSrc = shouldPlayFullDemo && fullVideoSrc ? fullVideoSrc : previewVideoSrc;
+  const waitingTimerRef = useRef<number | null>(null);
+  const hasDemo = Boolean(previewVideoSrc || fullVideoSources);
+  const currentFullQuality = fullDemoQualities[fullDemoQualityIndex];
+  const currentFullVideoSrc =
+    isFullDemoLoaded && fullVideoSources && currentFullQuality ? fullVideoSources[currentFullQuality] : undefined;
+  const shouldPlayFullDemo = Boolean(currentFullVideoSrc);
+  const demoSrc = shouldPlayFullDemo ? currentFullVideoSrc : previewVideoSrc;
+
+  useEffect(() => {
+    setQualityPreference(getDemoVideoQualityPreference());
+  }, []);
 
   useEffect(() => {
     setIndex(startIndex);
   }, [startIndex]);
 
   useEffect(() => {
-    setShowDemo(Boolean(startWithDemo && (previewVideoSrc || fullVideoSrc)));
-  }, [startWithDemo, previewVideoSrc, fullVideoSrc]);
+    setShowDemo(Boolean(startWithDemo && (previewVideoSrc || fullVideoSources)));
+  }, [startWithDemo, previewVideoSrc, fullVideoSources]);
 
   useEffect(() => {
     if (!showDemo) {
@@ -55,8 +77,35 @@ export function Lightbox({
     setIsFullDemoLoaded(false);
     setHasStartedFullDemo(false);
     setIsFullDemoUnavailable(true);
+    setHasCurrentFullDemoCanPlay(false);
     pendingDemoSeekTimeRef.current = null;
+    if (waitingTimerRef.current !== null) {
+      window.clearTimeout(waitingTimerRef.current);
+      waitingTimerRef.current = null;
+    }
   }, []);
+
+  const fallbackToLowerQuality = useCallback(() => {
+    if (!shouldPlayFullDemo) {
+      fallbackToPreview();
+      return;
+    }
+
+    if (fullDemoQualityIndex < fullDemoQualities.length - 1) {
+      const currentTime = demoVideoRef.current?.currentTime ?? null;
+      pendingDemoSeekTimeRef.current = currentTime;
+      setHasStartedFullDemo(false);
+      setHasCurrentFullDemoCanPlay(false);
+      setFullDemoQualityIndex((idx) => idx + 1);
+      if (waitingTimerRef.current !== null) {
+        window.clearTimeout(waitingTimerRef.current);
+        waitingTimerRef.current = null;
+      }
+      return;
+    }
+
+    fallbackToPreview();
+  }, [fallbackToPreview, fullDemoQualities.length, fullDemoQualityIndex, shouldPlayFullDemo]);
 
   useEffect(() => {
     if (!showDemo || !demoSrc) {
@@ -71,14 +120,30 @@ export function Lightbox({
     if (playAttempt && typeof playAttempt.catch === "function") {
       playAttempt.catch(() => {
         if (shouldPlayFullDemo) {
-          fallbackToPreview();
+          fallbackToLowerQuality();
           return;
         }
         video.muted = true;
         void video.play();
       });
     }
-  }, [showDemo, demoSrc, shouldPlayFullDemo, fallbackToPreview]);
+  }, [showDemo, demoSrc, shouldPlayFullDemo, fallbackToLowerQuality]);
+
+  useEffect(() => {
+    setHasCurrentFullDemoCanPlay(false);
+    if (waitingTimerRef.current !== null) {
+      window.clearTimeout(waitingTimerRef.current);
+      waitingTimerRef.current = null;
+    }
+  }, [demoSrc, shouldPlayFullDemo]);
+
+  useEffect(() => {
+    return () => {
+      if (waitingTimerRef.current !== null) {
+        window.clearTimeout(waitingTimerRef.current);
+      }
+    };
+  }, []);
 
   const count = images.length;
 
@@ -195,6 +260,7 @@ export function Lightbox({
                   if (showDemo) {
                     setShowDemo(false);
                     setIsFullDemoLoaded(false);
+                    setHasCurrentFullDemoCanPlay(false);
                     return;
                   }
                   setShowDemo(true);
@@ -235,6 +301,26 @@ export function Lightbox({
                 loop={!shouldPlayFullDemo}
                 playsInline
                 preload={shouldPlayFullDemo ? "metadata" : "none"}
+                onCanPlay={() => {
+                  if (shouldPlayFullDemo) {
+                    setHasCurrentFullDemoCanPlay(true);
+                    if (waitingTimerRef.current !== null) {
+                      window.clearTimeout(waitingTimerRef.current);
+                      waitingTimerRef.current = null;
+                    }
+                  }
+                }}
+                onWaiting={() => {
+                  if (!shouldPlayFullDemo || hasCurrentFullDemoCanPlay) {
+                    return;
+                  }
+                  if (waitingTimerRef.current !== null) {
+                    window.clearTimeout(waitingTimerRef.current);
+                  }
+                  waitingTimerRef.current = window.setTimeout(() => {
+                    fallbackToLowerQuality();
+                  }, STALL_TIMEOUT_MS);
+                }}
                 onLoadedMetadata={(event) => {
                   if (!shouldPlayFullDemo) return;
                   const savedTime = pendingDemoSeekTimeRef.current;
@@ -249,17 +335,43 @@ export function Lightbox({
                 }}
                   onError={() => {
                     if (shouldPlayFullDemo) {
-                      fallbackToPreview();
+                      fallbackToLowerQuality();
                     }
                   }}
                   onPlay={() => {
                     if (shouldPlayFullDemo) {
                       setHasStartedFullDemo(true);
                       setIsFullDemoUnavailable(false);
+                      if (waitingTimerRef.current !== null) {
+                        window.clearTimeout(waitingTimerRef.current);
+                        waitingTimerRef.current = null;
+                      }
                     }
                   }}
               />
-              {!hasStartedFullDemo && fullVideoSrc ? (
+              {fullVideoSources ? (
+                <div className="flex justify-center">
+                  <label htmlFor="lightbox-demo-quality-setting" className="flex items-center gap-2 text-xs text-muted-foreground">
+                    Quality
+                    <select
+                      id="lightbox-demo-quality-setting"
+                      value={qualityPreference}
+                      onChange={(event) => {
+                        const nextPreference = event.target.value as DemoVideoQualityPreference;
+                        setQualityPreference(nextPreference);
+                        setDemoVideoQualityPreference(nextPreference);
+                      }}
+                      className="rounded-md border border-foreground/20 bg-background px-2 py-1 text-xs text-foreground"
+                    >
+                      <option value="auto">Auto</option>
+                      <option value="low">Low</option>
+                      <option value="med">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                  </label>
+                </div>
+              ) : null}
+              {!hasStartedFullDemo && fullVideoSources ? (
                 <div className="flex justify-center">
                   <button
                     type="button"
@@ -268,6 +380,11 @@ export function Lightbox({
                       const video = demoVideoRef.current;
                       pendingDemoSeekTimeRef.current = video ? video.currentTime : null;
                       setIsFullDemoUnavailable(false);
+                      const preferredQuality = chooseVideoQuality(qualityPreference);
+                      const qualitySequence = getQualityFallbackSequence(fullVideoSources, preferredQuality);
+                      setFullDemoQualities(qualitySequence);
+                      setFullDemoQualityIndex(0);
+                      setHasCurrentFullDemoCanPlay(false);
                       setIsFullDemoLoaded(true);
                     }}
                     aria-label="Load and play full demo video"

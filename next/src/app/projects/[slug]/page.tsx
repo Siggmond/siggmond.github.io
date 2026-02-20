@@ -138,7 +138,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         layout={screenshotLayout}
         posterSrc={project.posterSrc}
         previewVideoSrc={project.previewVideoSrc}
-        fullVideoSrc={project.fullVideoSrc}
+        fullVideoSources={project.fullVideoSources}
       />
 
       {caseStudy ? (

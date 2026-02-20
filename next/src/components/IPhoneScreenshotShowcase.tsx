@@ -4,6 +4,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { Screenshot } from "@/content/projects";
 import { assetPath } from "@/lib/assetPath";
+import {
+  chooseVideoQuality,
+  getDemoVideoQualityPreference,
+  getQualityFallbackSequence,
+  setDemoVideoQualityPreference,
+  type DemoVideoQuality,
+  type DemoVideoQualityPreference,
+  type FullVideoSources,
+} from "@/lib/demoVideoQuality";
 
 type IPhoneScreenshotShowcaseProps = {
   items: Screenshot[];
@@ -11,7 +20,7 @@ type IPhoneScreenshotShowcaseProps = {
   frameSrc?: string;
   posterSrc?: string;
   previewVideoSrc?: string;
-  fullVideoSrc?: string;
+  fullVideoSources?: FullVideoSources;
 };
 
 function fallbackCaption(src: string) {
@@ -27,9 +36,10 @@ export function IPhoneScreenshotShowcase({
   frameSrc = "/devices/iphone12pro-frame-clean.png",
   posterSrc,
   previewVideoSrc,
-  fullVideoSrc,
+  fullVideoSources,
 }: IPhoneScreenshotShowcaseProps) {
   const TRANSITION_MS = 280;
+  const STALL_TIMEOUT_MS = 3000;
   const screenshots = useMemo(() => items.filter((it) => Boolean(it.src)), [items]);
   const screenshotSources = useMemo(() => screenshots.map((it) => assetPath(it.src)), [screenshots]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -39,13 +49,25 @@ export function IPhoneScreenshotShowcase({
   const [isFullDemoLoaded, setIsFullDemoLoaded] = useState(false);
   const [hasStartedFullDemo, setHasStartedFullDemo] = useState(false);
   const [isFullDemoUnavailable, setIsFullDemoUnavailable] = useState(false);
+  const [qualityPreference, setQualityPreference] = useState<DemoVideoQualityPreference>("auto");
+  const [fullDemoQualities, setFullDemoQualities] = useState<DemoVideoQuality[]>([]);
+  const [fullDemoQualityIndex, setFullDemoQualityIndex] = useState(0);
+  const [hasCurrentFullDemoCanPlay, setHasCurrentFullDemoCanPlay] = useState(false);
   const transitionTimerRef = useRef<number | null>(null);
+  const waitingTimerRef = useRef<number | null>(null);
   const currentIndexRef = useRef(0);
   const demoVideoRef = useRef<HTMLVideoElement | null>(null);
   const pendingDemoSeekTimeRef = useRef<number | null>(null);
   const total = screenshots.length;
-  const shouldPlayFullDemo = isFullDemoLoaded && Boolean(fullVideoSrc);
-  const demoSrc = shouldPlayFullDemo && fullVideoSrc ? fullVideoSrc : previewVideoSrc;
+  const currentFullQuality = fullDemoQualities[fullDemoQualityIndex];
+  const currentFullVideoSrc =
+    isFullDemoLoaded && fullVideoSources && currentFullQuality ? fullVideoSources[currentFullQuality] : undefined;
+  const shouldPlayFullDemo = Boolean(currentFullVideoSrc);
+  const demoSrc = shouldPlayFullDemo ? currentFullVideoSrc : previewVideoSrc;
+
+  useEffect(() => {
+    setQualityPreference(getDemoVideoQualityPreference());
+  }, []);
 
   useEffect(() => {
     currentIndexRef.current = currentIndex;
@@ -64,6 +86,9 @@ export function IPhoneScreenshotShowcase({
       if (transitionTimerRef.current !== null) {
         window.clearTimeout(transitionTimerRef.current);
       }
+      if (waitingTimerRef.current !== null) {
+        window.clearTimeout(waitingTimerRef.current);
+      }
     };
   }, []);
 
@@ -71,8 +96,35 @@ export function IPhoneScreenshotShowcase({
     setIsFullDemoLoaded(false);
     setHasStartedFullDemo(false);
     setIsFullDemoUnavailable(true);
+    setHasCurrentFullDemoCanPlay(false);
     pendingDemoSeekTimeRef.current = null;
+    if (waitingTimerRef.current !== null) {
+      window.clearTimeout(waitingTimerRef.current);
+      waitingTimerRef.current = null;
+    }
   }, []);
+
+  const fallbackToLowerQuality = useCallback(() => {
+    if (!shouldPlayFullDemo) {
+      fallbackToPreview();
+      return;
+    }
+
+    if (fullDemoQualityIndex < fullDemoQualities.length - 1) {
+      const currentTime = demoVideoRef.current?.currentTime ?? null;
+      pendingDemoSeekTimeRef.current = currentTime;
+      setHasStartedFullDemo(false);
+      setHasCurrentFullDemoCanPlay(false);
+      setFullDemoQualityIndex((idx) => idx + 1);
+      if (waitingTimerRef.current !== null) {
+        window.clearTimeout(waitingTimerRef.current);
+        waitingTimerRef.current = null;
+      }
+      return;
+    }
+
+    fallbackToPreview();
+  }, [fallbackToPreview, fullDemoQualities.length, fullDemoQualityIndex, shouldPlayFullDemo]);
 
   useEffect(() => {
     if (!isShowingDemo || !demoSrc) {
@@ -87,14 +139,22 @@ export function IPhoneScreenshotShowcase({
     if (playAttempt && typeof playAttempt.catch === "function") {
       playAttempt.catch(() => {
         if (shouldPlayFullDemo) {
-          fallbackToPreview();
+          fallbackToLowerQuality();
           return;
         }
         video.muted = true;
         void video.play();
       });
     }
-  }, [isShowingDemo, demoSrc, shouldPlayFullDemo, fallbackToPreview]);
+  }, [isShowingDemo, demoSrc, shouldPlayFullDemo, fallbackToLowerQuality]);
+
+  useEffect(() => {
+    setHasCurrentFullDemoCanPlay(false);
+    if (waitingTimerRef.current !== null) {
+      window.clearTimeout(waitingTimerRef.current);
+      waitingTimerRef.current = null;
+    }
+  }, [demoSrc, shouldPlayFullDemo]);
 
   const transitionTo = (nextIndex: number) => {
     if (!total) {
@@ -141,7 +201,7 @@ export function IPhoneScreenshotShowcase({
   const previousSrc = previousIndex !== null ? screenshotSources[previousIndex] : null;
   const caption = active.caption ?? fallbackCaption(active.src);
   const displayCaption = isShowingDemo ? "Demo Video" : caption;
-  const hasDemo = Boolean(previewVideoSrc || fullVideoSrc);
+  const hasDemo = Boolean(previewVideoSrc || fullVideoSources);
 
   return (
     <aside className="highlight-card rounded-2xl p-5">
@@ -172,6 +232,26 @@ export function IPhoneScreenshotShowcase({
                   loop={!shouldPlayFullDemo}
                   playsInline
                   preload={shouldPlayFullDemo ? "metadata" : "none"}
+                  onCanPlay={() => {
+                    if (shouldPlayFullDemo) {
+                      setHasCurrentFullDemoCanPlay(true);
+                      if (waitingTimerRef.current !== null) {
+                        window.clearTimeout(waitingTimerRef.current);
+                        waitingTimerRef.current = null;
+                      }
+                    }
+                  }}
+                  onWaiting={() => {
+                    if (!shouldPlayFullDemo || hasCurrentFullDemoCanPlay) {
+                      return;
+                    }
+                    if (waitingTimerRef.current !== null) {
+                      window.clearTimeout(waitingTimerRef.current);
+                    }
+                    waitingTimerRef.current = window.setTimeout(() => {
+                      fallbackToLowerQuality();
+                    }, STALL_TIMEOUT_MS);
+                  }}
                   onLoadedMetadata={(event) => {
                     if (!shouldPlayFullDemo) return;
                     const savedTime = pendingDemoSeekTimeRef.current;
@@ -186,13 +266,17 @@ export function IPhoneScreenshotShowcase({
                   }}
                   onError={() => {
                     if (shouldPlayFullDemo) {
-                      fallbackToPreview();
+                      fallbackToLowerQuality();
                     }
                   }}
                   onPlay={() => {
                     if (shouldPlayFullDemo) {
                       setHasStartedFullDemo(true);
                       setIsFullDemoUnavailable(false);
+                      if (waitingTimerRef.current !== null) {
+                        window.clearTimeout(waitingTimerRef.current);
+                        waitingTimerRef.current = null;
+                      }
                     }
                   }}
                 />
@@ -268,6 +352,7 @@ export function IPhoneScreenshotShowcase({
                 setIsFullDemoLoaded(false);
                 setHasStartedFullDemo(false);
                 setIsFullDemoUnavailable(false);
+                setHasCurrentFullDemoCanPlay(false);
                 return;
               }
               setIsFullDemoUnavailable(false);
@@ -281,7 +366,30 @@ export function IPhoneScreenshotShowcase({
         </div>
       ) : null}
 
-      {isShowingDemo && !hasStartedFullDemo && fullVideoSrc ? (
+      {isShowingDemo && fullVideoSources ? (
+        <div className="mt-2 flex justify-center">
+          <label htmlFor="demo-quality-setting" className="flex items-center gap-2 text-xs text-muted-foreground">
+            Quality
+            <select
+              id="demo-quality-setting"
+              value={qualityPreference}
+              onChange={(event) => {
+                const nextPreference = event.target.value as DemoVideoQualityPreference;
+                setQualityPreference(nextPreference);
+                setDemoVideoQualityPreference(nextPreference);
+              }}
+              className="rounded-md border border-foreground/20 bg-background px-2 py-1 text-xs text-foreground"
+            >
+              <option value="auto">Auto</option>
+              <option value="low">Low</option>
+              <option value="med">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </label>
+        </div>
+      ) : null}
+
+      {isShowingDemo && !hasStartedFullDemo && fullVideoSources ? (
         <div className="mt-2 flex justify-center">
           <button
             type="button"
@@ -289,6 +397,11 @@ export function IPhoneScreenshotShowcase({
               const video = demoVideoRef.current;
               pendingDemoSeekTimeRef.current = video ? video.currentTime : null;
               setIsFullDemoUnavailable(false);
+              const preferredQuality = chooseVideoQuality(qualityPreference);
+              const qualitySequence = getQualityFallbackSequence(fullVideoSources, preferredQuality);
+              setFullDemoQualities(qualitySequence);
+              setFullDemoQualityIndex(0);
+              setHasCurrentFullDemoCanPlay(false);
               setIsFullDemoLoaded(true);
             }}
             className="rounded-lg border border-foreground/15 px-3 py-2 text-xs font-mono uppercase tracking-wide hover:border-foreground/30"

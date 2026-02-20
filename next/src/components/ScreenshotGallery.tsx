@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 
 import { assetPath } from "@/lib/assetPath";
 import { Lightbox } from "@/components/Lightbox";
+import type { FullVideoSources } from "@/lib/demoVideoQuality";
 
 export type Screenshot = {
   src: string;
@@ -18,13 +19,13 @@ export function ScreenshotGallery({
   layout = "grid",
   posterSrc,
   previewVideoSrc,
-  fullVideoSrc,
+  fullVideoSources,
 }: {
   items: Screenshot[];
   layout?: ScreenshotGalleryLayout;
   posterSrc?: string;
   previewVideoSrc?: string;
-  fullVideoSrc?: string;
+  fullVideoSources?: FullVideoSources;
 }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [startWithDemo, setStartWithDemo] = useState(false);
@@ -45,7 +46,7 @@ export function ScreenshotGallery({
     <section className="mt-10">
       <div className="flex items-center justify-between gap-3">
         <div className="text-sm tracking-widest uppercase text-muted-foreground font-mono">Screenshots</div>
-        {previewVideoSrc || fullVideoSrc ? (
+        {previewVideoSrc || fullVideoSources ? (
           <button
             type="button"
             className="rounded-md border border-foreground/15 px-3 py-1.5 text-xs font-mono uppercase tracking-wide hover:border-foreground/30"
@@ -100,7 +101,7 @@ export function ScreenshotGallery({
           startIndex={openIndex}
           posterSrc={posterSrc}
           previewVideoSrc={previewVideoSrc}
-          fullVideoSrc={fullVideoSrc}
+          fullVideoSources={fullVideoSources}
           startWithDemo={startWithDemo}
           onClose={() => {
             setOpenIndex(null);

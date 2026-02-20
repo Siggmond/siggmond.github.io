@@ -66,7 +66,11 @@ export type ProjectEntry = {
   screenshots?: Screenshot[];
   posterSrc?: string;
   previewVideoSrc?: string;
-  fullVideoSrc?: string;
+  fullVideoSources?: {
+    low: string;
+    med: string;
+    high: string;
+  };
 
   caseStudyFile?: string;
 };
@@ -559,7 +563,11 @@ reposcope analyze .
     thumbnail: "/projects/novacommerce/home-page-1.png",
     posterSrc: "/projects/novacommerce/demo-videos/poster.jpg",
     previewVideoSrc: "/projects/novacommerce/demo-videos/preview.webm",
-    fullVideoSrc: "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd1.webm",
+    fullVideoSources: {
+      low: "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd1_low.webm",
+      med: "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd1_med.webm",
+      high: "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd1.webm",
+    },
     screenshots: [
       { src: "/projects/novacommerce/sign-in-page.png", caption: "Sign In" },
       { src: "/projects/novacommerce/home-page-1.png", caption: "Home" },
@@ -660,7 +668,11 @@ Data
     thumbnail: "/projects/stock-pilot/dashboard-1.png",
     posterSrc: "/projects/stock-pilot/demo-videos/poster.jpg",
     previewVideoSrc: "/projects/stock-pilot/demo-videos/preview.webm",
-    fullVideoSrc: "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd3.webm",
+    fullVideoSources: {
+      low: "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd3_low.webm",
+      med: "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd3_med.webm",
+      high: "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd3.webm",
+    },
     screenshots: [
       { src: "/projects/stock-pilot/welcome-1.png", caption: "Onboarding Step 1" },
       { src: "/projects/stock-pilot/welcome-2.png", caption: "Onboarding Step 2" },
@@ -741,7 +753,11 @@ Presentation
     thumbnail: "/projects/gen-zero/Home-Feed-4.png",
     posterSrc: "/projects/gen-zero/demo-videos/poster.jpg",
     previewVideoSrc: "/projects/gen-zero/demo-videos/preview.webm",
-    fullVideoSrc: "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd2.webm",
+    fullVideoSources: {
+      low: "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd2_low.webm",
+      med: "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd2_med.webm",
+      high: "https://github.com/Siggmond/siggmond.github.io/releases/download/v1.0/vd2.webm",
+    },
     screenshots: [
       { src: "/projects/gen-zero/Welcome-screen.png", caption: "Welcome Screen" },
       { src: "/projects/gen-zero/Home-Feed-2.png", caption: "Home Feed 2" },

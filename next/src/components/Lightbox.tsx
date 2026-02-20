@@ -215,6 +215,7 @@ export function Lightbox({
                 onError={() => {
                   if (isFullDemoLoaded) {
                     setIsFullDemoLoaded(false);
+                    setHasStartedFullDemo(false);
                   }
                 }}
                 onPlay={() => {

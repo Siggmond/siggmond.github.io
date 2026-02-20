@@ -153,6 +153,7 @@ export function IPhoneScreenshotShowcase({
                   onError={() => {
                     if (isFullDemoLoaded) {
                       setIsFullDemoLoaded(false);
+                      setHasStartedFullDemo(false);
                     }
                   }}
                   onPlay={() => {

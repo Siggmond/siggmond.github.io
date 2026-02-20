@@ -106,8 +106,10 @@ export function IPhoneScreenshotShowcase({
   const previousSrc = previousIndex !== null ? screenshotSources[previousIndex] : null;
   const caption = active.caption ?? fallbackCaption(active.src);
   const displayCaption = isShowingDemo ? "Demo Video" : caption;
-  const demoSrc = isFullDemoLoaded && fullVideoSrc ? fullVideoSrc : previewVideoSrc;
-  const hasDemo = Boolean(previewVideoSrc || fullVideoSrc);
+  const fallbackDemoSrc = previewVideoSrc ?? fullVideoSrc;
+  const hasFullDemo = Boolean(fullVideoSrc);
+  const demoSrc = isFullDemoLoaded && hasFullDemo ? fullVideoSrc : fallbackDemoSrc;
+  const hasDemo = Boolean(fallbackDemoSrc);
 
   return (
     <aside className="highlight-card rounded-2xl p-5">
@@ -220,7 +222,7 @@ export function IPhoneScreenshotShowcase({
         </div>
       ) : null}
 
-      {isShowingDemo && !isFullDemoLoaded && fullVideoSrc ? (
+      {isShowingDemo && !isFullDemoLoaded && hasFullDemo ? (
         <div className="mt-2 flex justify-center">
           <button
             type="button"

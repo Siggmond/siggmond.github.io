@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { Screenshot } from "@/content/projects";
 import { assetPath } from "@/lib/assetPath";
+import { canReachVideo } from "@/lib/videoAvailability";
 
 type IPhoneScreenshotShowcaseProps = {
   items: Screenshot[];
@@ -85,28 +86,9 @@ export function IPhoneScreenshotShowcase({
       }
 
       try {
-        const headResponse = await fetch(fullUrl, {
-          method: "HEAD",
-          cache: "no-store",
-          signal: controller.signal,
-        });
-        if (!isCancelled && headResponse.ok) {
-          setIsFullDemoAvailable(true);
-          return;
-        }
-      } catch {
-        // Fallback request below handles servers that block HEAD.
-      }
-
-      try {
-        const rangeResponse = await fetch(fullUrl, {
-          method: "GET",
-          headers: { Range: "bytes=0-0" },
-          cache: "no-store",
-          signal: controller.signal,
-        });
+        const available = await canReachVideo(fullUrl, controller.signal);
         if (!isCancelled) {
-          setIsFullDemoAvailable(rangeResponse.ok || rangeResponse.status === 206);
+          setIsFullDemoAvailable(available);
         }
       } catch {
         if (!isCancelled) {

@@ -35,7 +35,7 @@ jobs:
         run: npm ci
         working-directory: next
 
-      - name: Download demo videos
+      - name: Download demo previews and posters
         shell: bash
         run: |
           set -e
@@ -48,20 +48,9 @@ jobs:
           GEN_POSTER_URL="https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/poster-vd2.jpg"
           STOCK_POSTER_URL="https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/poster-vd3.jpg"
 
-          NOVA_FULL_URL="https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd1.webm"
-          GEN_FULL_URL="https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd2.webm"
-          STOCK_FULL_URL="https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd3.webm"
-
           NOVA_PREVIEW_URL="https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd1_preview.webm"
           GEN_PREVIEW_URL="https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd2_preview.webm"
           STOCK_PREVIEW_URL="https://github.com/Siggmond/siggmond.github.io/releases/download/${RELEASE_TAG}/vd3_preview.webm"
-
-          echo "Downloading: ${NOVA_FULL_URL}"
-          curl -L --fail -o next/public/projects/novacommerce/demo-videos/vd1.webm "${NOVA_FULL_URL}" || true
-          echo "Downloading: ${GEN_FULL_URL}"
-          curl -L --fail -o next/public/projects/gen-zero/demo-videos/vd2.webm "${GEN_FULL_URL}" || true
-          echo "Downloading: ${STOCK_FULL_URL}"
-          curl -L --fail -o next/public/projects/stock-pilot/demo-videos/vd3.webm "${STOCK_FULL_URL}" || true
 
           echo "Downloading: ${NOVA_POSTER_URL}"
           curl -L --fail -o next/public/projects/novacommerce/demo-videos/poster.jpg "${NOVA_POSTER_URL}" || true

@@ -24,20 +24,18 @@ export function Lightbox({
   onClose,
 }: LightboxProps) {
   const [index, setIndex] = useState(startIndex);
-  const fallbackDemoSrc = previewVideoSrc ?? fullVideoSrc;
-  const hasFullDemo = Boolean(fullVideoSrc);
-  const [showDemo, setShowDemo] = useState(Boolean(startWithDemo && fallbackDemoSrc));
+  const [showDemo, setShowDemo] = useState(Boolean(startWithDemo && (previewVideoSrc || fullVideoSrc)));
   const [isFullDemoLoaded, setIsFullDemoLoaded] = useState(false);
   const dialogRef = useRef<HTMLDivElement | null>(null);
-  const hasDemo = Boolean(fallbackDemoSrc);
+  const hasDemo = Boolean(previewVideoSrc || fullVideoSrc);
 
   useEffect(() => {
     setIndex(startIndex);
   }, [startIndex]);
 
   useEffect(() => {
-    setShowDemo(Boolean(startWithDemo && fallbackDemoSrc));
-  }, [startWithDemo, fallbackDemoSrc]);
+    setShowDemo(Boolean(startWithDemo && (previewVideoSrc || fullVideoSrc)));
+  }, [startWithDemo, previewVideoSrc, fullVideoSrc]);
 
   useEffect(() => {
     if (!showDemo) {
@@ -125,7 +123,7 @@ export function Lightbox({
   if (!images.length && !hasDemo) return null;
 
   const currentSrc = images[index] ?? images[0] ?? "";
-  const demoSrc = isFullDemoLoaded && hasFullDemo ? fullVideoSrc : fallbackDemoSrc;
+  const demoSrc = isFullDemoLoaded && fullVideoSrc ? fullVideoSrc : previewVideoSrc;
 
   return (
     <div
@@ -201,7 +199,7 @@ export function Lightbox({
                 playsInline
                 preload={isFullDemoLoaded ? "metadata" : "none"}
               />
-              {!isFullDemoLoaded && hasFullDemo ? (
+              {!isFullDemoLoaded && fullVideoSrc ? (
                 <div className="flex justify-center">
                   <button
                     type="button"
